@@ -2,8 +2,17 @@
    Villa Caesarea — public site logic
    =================================================================== */
 
-(function () {
-  let data = loadData();
+(async function () {
+  let data;
+  try {
+    data = await loadData();
+  } catch (err) {
+    console.error("Failed to load villa data from Supabase", err);
+    document.body.innerHTML =
+      '<p style="padding:4rem;font-family:sans-serif;text-align:center;">Sorry, we could not load the site right now. Please try again shortly.</p>';
+    return;
+  }
+
   let lang = localStorage.getItem("villaSiteLang") || (navigator.language || "en").slice(0, 2);
   if (lang !== "en" && lang !== "he") lang = "he";
 
@@ -324,13 +333,20 @@
   /* ---------------- Init ---------------- */
   $("#year").textContent = new Date().getFullYear();
 
-  // pick up fresh data if admin edited it in another tab of the same browser
-  window.addEventListener("storage", (e) => {
-    if (e.key === STORAGE_KEY) {
-      data = loadData();
-      applyI18n();
-    }
-  });
-
   applyI18n();
+
+  // keep the public site live: when the admin changes content, pricing,
+  // availability or images, refresh automatically without a page reload
+  let refreshTimer = null;
+  subscribeToVillaChanges(() => {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(async () => {
+      try {
+        data = await loadData();
+        applyI18n();
+      } catch (err) {
+        console.error("Failed to refresh villa data", err);
+      }
+    }, 400);
+  });
 })();

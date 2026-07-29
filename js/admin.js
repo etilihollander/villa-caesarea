@@ -1,9 +1,9 @@
 /* ===================================================================
-   Villa Caesarea — admin panel logic
+   Villa Caesarea — admin panel logic (Supabase-backed)
    =================================================================== */
 
 (function () {
-  let data = loadData();
+  let data = null;
   let contentLang = "he";
   let selRange = { start: null, end: null };
   let admViewYear, admViewMonth;
@@ -17,20 +17,16 @@
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
   const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
-  const HE_DAYS = ["א'","ב'","ג'","ד'","ה'","ו'","ש'"];
+  const HE_DAYS = ["א","ב","ג","ד","ה","ו","ש"];
 
   /* ---------------- Auth ---------------- */
   const loginScreen = $("#loginScreen");
   const adminShell = $("#adminShell");
 
-  function isLoggedIn() {
-    return sessionStorage.getItem("villaAdminLoggedIn") === "1";
-  }
-
-  function showApp() {
+  async function showApp() {
     loginScreen.style.display = "none";
     adminShell.style.display = "flex";
-    initAdminUI();
+    await refreshAllData();
   }
 
   function showLogin() {
@@ -38,26 +34,34 @@
     adminShell.style.display = "none";
   }
 
-  $("#loginForm").addEventListener("submit", (e) => {
+  $("#loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const user = $("#loginUser").value.trim();
+    const email = $("#loginUser").value.trim();
     const pass = $("#loginPass").value;
-    if (user === data.admin.username && simpleHash(pass) === data.admin.passwordHash) {
-      sessionStorage.setItem("villaAdminLoggedIn", "1");
-      $("#loginError").textContent = "";
-      showApp();
-    } else {
-      $("#loginError").textContent = "שם משתמש או סיסמה שגויים.";
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    $("#loginError").textContent = "";
+    try {
+      await adminSignIn(email, pass);
+      await showApp();
+    } catch (err) {
+      $("#loginError").textContent = "אימייל או סיסמה שגויים.";
+      console.error(err);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 
-  $("#logoutBtn").addEventListener("click", () => {
-    sessionStorage.removeItem("villaAdminLoggedIn");
+  $("#logoutBtn").addEventListener("click", async () => {
+    await adminSignOut();
     showLogin();
   });
 
-  if (isLoggedIn()) showApp();
-  else showLogin();
+  (async () => {
+    const session = await getAdminSession();
+    if (session) await showApp();
+    else showLogin();
+  })();
 
   /* ---------------- Sidebar nav ---------------- */
   function initSidebar() {
@@ -122,7 +126,7 @@
     });
   });
 
-  $("#saveContentBtn").addEventListener("click", () => {
+  $("#saveContentBtn").addEventListener("click", async () => {
     const c = data.content[contentLang];
     c.villaName = $("#f-villaName").value;
     c.area = $("#f-area").value;
@@ -133,8 +137,17 @@
     c.introTitle = $("#f-introTitle").value;
     c.introText = $("#f-introText").value;
     c.amenities = $$("#amenitiesEditor input").map((i) => i.value).filter((v) => v.trim() !== "");
-    saveData(data);
-    flashStatus("#contentSaveStatus");
+    const btn = $("#saveContentBtn");
+    btn.disabled = true;
+    try {
+      await updateContent(contentLang, c);
+      flashStatus("#contentSaveStatus");
+    } catch (err) {
+      alert("שגיאה בשמירה: " + err.message);
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   function flashStatus(sel) {
@@ -147,26 +160,29 @@
   function renderImages() {
     const grid = $("#imageGrid");
     grid.innerHTML = "";
-    data.images.forEach((img, idx) => {
+    data.images.forEach((img) => {
       const tile = document.createElement("div");
       tile.className = "image-tile";
       tile.innerHTML = `
         <img src="${img.file}" alt="">
-        ${idx === 0 ? '<span class="hero-badge">הירו</span>' : ""}
+        ${img.isHero ? '<span class="hero-badge">הירו</span>' : ""}
         <span class="tag-badge">${img.tag || ""}</span>
       `;
       const actions = document.createElement("div");
       actions.style.cssText = "position:absolute;top:6px;left:6px;display:flex;gap:4px;";
-      if (idx !== 0) {
+      if (!img.isHero) {
         const heroBtn = document.createElement("button");
         heroBtn.type = "button";
         heroBtn.textContent = "הפוך להירו";
         heroBtn.style.cssText = "font-size:0.6rem;background:#fff;border:none;padding:2px 6px;cursor:pointer;";
-        heroBtn.addEventListener("click", () => {
-          const [moved] = data.images.splice(idx, 1);
-          data.images.unshift(moved);
-          saveData(data);
-          renderImages();
+        heroBtn.addEventListener("click", async () => {
+          heroBtn.disabled = true;
+          try {
+            await setHeroImage(img.id);
+            await refreshAllData();
+          } catch (err) {
+            alert("שגיאה: " + err.message);
+          }
         });
         actions.appendChild(heroBtn);
       }
@@ -174,15 +190,19 @@
       delBtn.type = "button";
       delBtn.textContent = "✕";
       delBtn.style.cssText = "font-size:0.7rem;background:#fff;border:none;padding:2px 7px;cursor:pointer;color:#b96a55;";
-      delBtn.addEventListener("click", () => {
+      delBtn.addEventListener("click", async () => {
         if (data.images.length <= 1) {
           alert("חייבת להישאר לפחות תמונה אחת.");
           return;
         }
         if (confirm("להסיר את התמונה?")) {
-          data.images.splice(idx, 1);
-          saveData(data);
-          renderImages();
+          delBtn.disabled = true;
+          try {
+            await deleteImageRow(img.id, img.file);
+            await refreshAllData();
+          } catch (err) {
+            alert("שגיאה במחיקה: " + err.message);
+          }
         }
       });
       actions.appendChild(delBtn);
@@ -191,36 +211,22 @@
     });
   }
 
-  $("#imageUploadInput").addEventListener("change", (e) => {
+  $("#imageUploadInput").addEventListener("change", async (e) => {
     const files = Array.from(e.target.files || []);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-          const maxW = 1600;
-          const scale = Math.min(1, maxW / img.width);
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-          data.images.push({ file: dataUrl, tag: "custom" });
-          try {
-            saveData(data);
-          } catch (err) {
-            alert("שגיאה בשמירה — ייתכן שאחסון הדפדפן מלא. נסו תמונה קטנה יותר או הסירו תמונות ישנות.");
-            data.images.pop();
-            return;
-          }
-          renderImages();
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+    const dropLabel = $(".upload-drop");
+    const originalText = dropLabel.firstChild.textContent;
+    for (const file of files) {
+      dropLabel.firstChild.textContent = `מעלה ${file.name}...`;
+      try {
+        await uploadImageFile(file);
+      } catch (err) {
+        alert("שגיאה בהעלאת תמונה: " + err.message);
+        console.error(err);
+      }
+    }
+    dropLabel.firstChild.textContent = originalText;
     e.target.value = "";
+    await refreshAllData();
   });
 
   /* ---------------- Calendar panel ---------------- */
@@ -335,47 +341,31 @@
     renderMiniCalendars();
   });
 
-  function eachDateInRange(startKey, endKey, cb) {
-    let cursor = new Date(startKey);
-    const end = new Date(endKey || startKey);
-    while (cursor <= end) {
-      cb(fmtDateKey(cursor));
-      cursor.setDate(cursor.getDate() + 1);
+  async function withRangeAction(actionFn) {
+    if (!selRange.start) return alert("בחרו קודם טווח תאריכים ביומן.");
+    try {
+      await actionFn();
+      await refreshAllData();
+    } catch (err) {
+      alert("שגיאה: " + err.message);
+      console.error(err);
     }
   }
 
   $("#setPriceBtn").addEventListener("click", () => {
-    if (!selRange.start) return alert("בחרו קודם טווח תאריכים ביומן.");
     const price = Number($("#rangePriceInput").value);
     if (!price || price <= 0) return alert("הזינו מחיר תקין.");
-    eachDateInRange(selRange.start, selRange.end, (key) => {
-      const existing = data.pricing.days[key] || {};
-      data.pricing.days[key] = { ...existing, price, closed: false };
-    });
-    saveData(data);
-    renderMiniCalendars();
-    flashStatus("#contentSaveStatus");
+    withRangeAction(() => setCalendarPriceRange(selRange.start, selRange.end, price)).then(() =>
+      flashStatus("#contentSaveStatus")
+    );
   });
 
   $("#closeRangeBtn").addEventListener("click", () => {
-    if (!selRange.start) return alert("בחרו קודם טווח תאריכים ביומן.");
-    eachDateInRange(selRange.start, selRange.end, (key) => {
-      const existing = data.pricing.days[key] || {};
-      data.pricing.days[key] = { ...existing, closed: true };
-    });
-    saveData(data);
-    renderMiniCalendars();
+    withRangeAction(() => setCalendarClosedRange(selRange.start, selRange.end, true));
   });
 
   $("#reopenRangeBtn").addEventListener("click", () => {
-    if (!selRange.start) return alert("בחרו קודם טווח תאריכים ביומן.");
-    eachDateInRange(selRange.start, selRange.end, (key) => {
-      if (data.pricing.days[key]) {
-        data.pricing.days[key].closed = false;
-      }
-    });
-    saveData(data);
-    renderMiniCalendars();
+    withRangeAction(() => setCalendarClosedRange(selRange.start, selRange.end, false));
   });
 
   $("#clearSelectionBtn").addEventListener("click", () => {
@@ -385,50 +375,58 @@
   });
 
   /* ---------------- Settings panel ---------------- */
-  function loadSettingsForm() {
+  async function loadSettingsForm() {
     $("#f-basePrice").value = data.pricing.basePrice;
     $("#f-minNights").value = data.pricing.minNights;
     $("#f-contactEmail").value = data.contactEmail;
-    $("#f-adminUser").value = data.admin.username;
+    const session = await getAdminSession();
+    if (session && session.user) $("#f-adminEmail").value = session.user.email;
   }
 
-  $("#saveSettingsBtn").addEventListener("click", () => {
-    data.pricing.basePrice = Number($("#f-basePrice").value) || data.pricing.basePrice;
-    data.pricing.minNights = Number($("#f-minNights").value) || data.pricing.minNights;
-    data.contactEmail = $("#f-contactEmail").value || data.contactEmail;
-    saveData(data);
-    flashStatus("#settingsSaveStatus");
-    renderMiniCalendars();
+  $("#saveSettingsBtn").addEventListener("click", async () => {
+    const btn = $("#saveSettingsBtn");
+    btn.disabled = true;
+    try {
+      await updateSettings({
+        basePrice: Number($("#f-basePrice").value) || data.pricing.basePrice,
+        minNights: Number($("#f-minNights").value) || data.pricing.minNights,
+        contactEmail: $("#f-contactEmail").value || data.contactEmail
+      });
+      await refreshAllData();
+      flashStatus("#settingsSaveStatus");
+    } catch (err) {
+      alert("שגיאה בשמירה: " + err.message);
+    } finally {
+      btn.disabled = false;
+    }
   });
 
-  $("#savePassBtn").addEventListener("click", () => {
-    const user = $("#f-adminUser").value.trim();
+  $("#savePassBtn").addEventListener("click", async () => {
     const p1 = $("#f-newPass").value;
     const p2 = $("#f-newPass2").value;
-    if (!user) return alert("יש להזין שם משתמש.");
-    if (p1 || p2) {
-      if (p1.length < 6) return alert("הסיסמה חייבת להכיל לפחות 6 תווים.");
-      if (p1 !== p2) return alert("אימות הסיסמה אינו תואם.");
-      data.admin.passwordHash = simpleHash(p1);
-    }
-    data.admin.username = user;
-    saveData(data);
-    $("#f-newPass").value = "";
-    $("#f-newPass2").value = "";
-    flashStatus("#passSaveStatus");
-  });
-
-  $("#resetDataBtn").addEventListener("click", () => {
-    if (confirm("לאפס את כל התוכן, התמונות והיומן לברירת המחדל? הפעולה אינה הפיכה.")) {
-      data = resetData();
-      initAdminUI();
-      alert("הנתונים אופסו.");
+    if (!p1 && !p2) return alert("הזינו סיסמה חדשה.");
+    if (p1.length < 6) return alert("הסיסמה חייבת להכיל לפחות 6 תווים.");
+    if (p1 !== p2) return alert("אימות הסיסמה אינו תואם.");
+    const btn = $("#savePassBtn");
+    btn.disabled = true;
+    try {
+      await changeAdminPassword(p1);
+      $("#f-newPass").value = "";
+      $("#f-newPass2").value = "";
+      flashStatus("#passSaveStatus");
+    } catch (err) {
+      alert("שגיאה בעדכון הסיסמה: " + err.message);
+    } finally {
+      btn.disabled = false;
     }
   });
 
   /* ---------------- Init ---------------- */
   let sidebarInit = false;
-  function initAdminUI() {
+  let unsubscribe = null;
+
+  async function refreshAllData() {
+    data = await loadData();
     if (!sidebarInit) {
       initSidebar();
       sidebarInit = true;
@@ -437,6 +435,13 @@
     renderImages();
     renderMiniCalendars();
     updateRangeSummary();
-    loadSettingsForm();
+    await loadSettingsForm();
+
+    if (!unsubscribe) {
+      unsubscribe = subscribeToVillaChanges(() => {
+        // avoid clobbering in-progress edits: just note that a change happened
+        // elsewhere; the admin can switch panels to see the latest state.
+      });
+    }
   }
 })();
