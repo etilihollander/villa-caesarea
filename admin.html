@@ -18,8 +18,8 @@
     <p class="hint">התחברות למערכת ניהול תוכן ויומן הוילה</p>
     <form id="loginForm">
       <div class="field">
-        <label>שם משתמש</label>
-        <input type="text" id="loginUser" autocomplete="username" required>
+        <label>אימייל</label>
+        <input type="email" id="loginUser" autocomplete="username" required>
       </div>
       <div class="field">
         <label>סיסמה</label>
@@ -29,8 +29,8 @@
       <div class="login-error" id="loginError"></div>
     </form>
     <div class="login-demo-note">
-      גרסת דמו: פרטי ברירת המחדל הם <strong>admin</strong> / <strong>caesarea2026</strong>.
-      ניתן לשנות סיסמה בלשונית "הגדרות" לאחר ההתחברות.
+      ההתחברות מנוהלת דרך Supabase Auth. אם עדיין לא יצרתם משתמש אדמין,
+      עשו זאת דרך לוח הבקרה של Supabase (Authentication → Users → Add user).
     </div>
   </div>
 </div>
@@ -104,7 +104,7 @@
       <p class="desc">תמונת ה"הירו" מוצגת בראש עמוד הבית. כל שאר התמונות מופיעות בגלריה.</p>
 
       <label class="upload-drop" for="imageUploadInput">
-        לחצו כדי להעלות תמונה חדשה (JPG/PNG, תישמר בדפדפן זה)
+        <span>לחצו כדי להעלות תמונה חדשה (JPG/PNG, תישמר ב-Supabase Storage)</span>
         <input type="file" id="imageUploadInput" accept="image/*" style="display:none" multiple>
       </label>
 
@@ -158,10 +158,10 @@
       </div>
 
       <div class="admin-card">
-        <h3>שינוי סיסמת ניהול</h3>
-        <div class="settings-note">שימו לב: זהו אימות פשוט המיועד להדגמה בלבד, מאוחסן בדפדפן זה. לפני שהאתר עולה לאוויר בפועל יש להחליף למערכת התחברות מאובטחת אמיתית.</div>
+        <h3>חשבון ההתחברות</h3>
+        <div class="settings-note">ההתחברות מנוהלת דרך Supabase Auth. כדי להוסיף מנהל נוסף או לשנות אימייל, היכנסו ללוח הבקרה של Supabase (Authentication → Users).</div>
         <div class="form-grid">
-          <div class="field"><label>שם משתמש</label><input type="text" id="f-adminUser"></div>
+          <div class="field"><label>אימייל מחובר</label><input type="email" id="f-adminEmail" disabled></div>
           <div class="two-col">
             <div class="field"><label>סיסמה חדשה</label><input type="password" id="f-newPass"></div>
             <div class="field"><label>אימות סיסמה</label><input type="password" id="f-newPass2"></div>
@@ -170,17 +170,13 @@
         <button class="btn btn-primary" style="margin-top:1rem;" id="savePassBtn">עדכון סיסמה</button>
         <span class="save-status" id="passSaveStatus">עודכן ✓</span>
       </div>
-
-      <div class="admin-card">
-        <h3>איפוס נתוני דמו</h3>
-        <p style="font-size:0.86rem; color:var(--color-ink-soft);">מחזיר את כל התוכן, התמונות והיומן לברירת המחדל המקורית. פעולה זו אינה הפיכה.</p>
-        <button class="btn" id="resetDataBtn">איפוס לברירת מחדל</button>
-      </div>
     </section>
 
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
 <script src="js/data.js"></script>
 <script src="js/admin.js"></script>
 </body>
