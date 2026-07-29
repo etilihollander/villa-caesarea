@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול האתר — וילה קיסריה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;500;700&family=Jost:wght@300;400;500&family=Assistant:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+<!-- ========== LOGIN ========== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <h1>פאנל ניהול</h1>
+    <p class="hint">התחברות למערכת ניהול תוכן ויומן הוילה</p>
+    <form id="loginForm">
+      <div class="field">
+        <label>שם משתמש</label>
+        <input type="text" id="loginUser" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>סיסמה</label>
+        <input type="password" id="loginPass" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">כניסה</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+    <div class="login-demo-note">
+      גרסת דמו: פרטי ברירת המחדל הם <strong>admin</strong> / <strong>caesarea2026</strong>.
+      ניתן לשנות סיסמה בלשונית "הגדרות" לאחר ההתחברות.
+    </div>
+  </div>
+</div>
+
+<!-- ========== ADMIN SHELL ========== -->
+<div class="admin-shell" id="adminShell" style="display:none;">
+  <aside class="admin-sidebar">
+    <div class="brand-mini">וילה קיסריה</div>
+    <div class="role-tag">ניהול</div>
+    <nav class="admin-nav">
+      <button data-panel="content" class="active">תוכן האתר</button>
+      <button data-panel="images">תמונות</button>
+      <button data-panel="calendar">יומן ומחירים</button>
+      <button data-panel="settings">הגדרות</button>
+    </nav>
+    <a href="index.html" target="_blank" class="view-site">↗ צפייה באתר</a>
+    <button class="logout-btn" id="logoutBtn">התנתקות</button>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- ---- CONTENT PANEL ---- -->
+    <section class="admin-panel active" id="panel-content">
+      <h2>תוכן האתר</h2>
+      <p class="desc">עריכת הטקסטים המוצגים באתר, בעברית ובאנגלית בנפרד.</p>
+
+      <div class="lang-tabs">
+        <button data-content-lang="he" class="active">עברית</button>
+        <button data-content-lang="en">English</button>
+      </div>
+
+      <div class="admin-card">
+        <h3>פרטי בסיס</h3>
+        <div class="form-grid">
+          <div class="two-col">
+            <div class="field"><label>שם הוילה</label><input type="text" id="f-villaName"></div>
+            <div class="field"><label>מיקום (למשל קיסריה)</label><input type="text" id="f-area"></div>
+          </div>
+          <div class="field"><label>כותרת משנה (Tagline מתחת ללוגו בעמוד הבית)</label><input type="text" id="f-tagline"></div>
+          <div class="two-col">
+            <div class="field"><label>מספר אורחים מקסימלי</label><input type="text" id="f-guests"></div>
+            <div class="field"><label>חדרי שינה</label><input type="text" id="f-bedrooms"></div>
+          </div>
+          <div class="field"><label>חדרי רחצה</label><input type="text" id="f-bathrooms"></div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>תיאור הוילה</h3>
+        <div class="form-grid">
+          <div class="field"><label>כותרת הקדמה</label><input type="text" id="f-introTitle"></div>
+          <div class="field"><label>טקסט תיאור מלא</label><textarea id="f-introText" rows="6"></textarea></div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>מתקנים (Amenities)</h3>
+        <div id="amenitiesEditor"></div>
+        <button class="add-amenity-btn" id="addAmenityBtn">+ הוספת מתקן</button>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn-primary" id="saveContentBtn">שמירת שינויים</button>
+        <span class="save-status" id="contentSaveStatus">נשמר ✓</span>
+      </div>
+    </section>
+
+    <!-- ---- IMAGES PANEL ---- -->
+    <section class="admin-panel" id="panel-images">
+      <h2>תמונות</h2>
+      <p class="desc">תמונת ה"הירו" מוצגת בראש עמוד הבית. כל שאר התמונות מופיעות בגלריה.</p>
+
+      <label class="upload-drop" for="imageUploadInput">
+        לחצו כדי להעלות תמונה חדשה (JPG/PNG, תישמר בדפדפן זה)
+        <input type="file" id="imageUploadInput" accept="image/*" style="display:none" multiple>
+      </label>
+
+      <div class="image-grid" id="imageGrid"></div>
+    </section>
+
+    <!-- ---- CALENDAR PANEL ---- -->
+    <section class="admin-panel" id="panel-calendar">
+      <h2>יומן ומחירים</h2>
+      <p class="desc">בחרו טווח תאריכים בלוח השנה (לחיצה על תאריך התחלה ולאחר מכן תאריך סיום), ואז קבעו מחיר ללילה או סגרו/פתחו את התאריכים.</p>
+
+      <div class="selection-summary" id="rangeSummary">לא נבחר טווח תאריכים.</div>
+
+      <div class="admin-calendar-toolbar">
+        <div class="field">
+          <label>מחיר ללילה לטווח שנבחר (₪)</label>
+          <input type="number" id="rangePriceInput" placeholder="לדוגמה 14000">
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="setPriceBtn">קביעת מחיר</button>
+          <button class="btn" id="closeRangeBtn">סגירת תאריכים</button>
+          <button class="btn" id="reopenRangeBtn">פתיחה מחדש</button>
+          <button class="btn" id="clearSelectionBtn">ביטול בחירה</button>
+        </div>
+      </div>
+
+      <div class="range-nav">
+        <button id="admCalPrev">&#8249;</button>
+        <strong id="admCalRangeLabel"></strong>
+        <button id="admCalNext">&#8250;</button>
+      </div>
+
+      <div class="mini-calendars" id="miniCalendars"></div>
+    </section>
+
+    <!-- ---- SETTINGS PANEL ---- -->
+    <section class="admin-panel" id="panel-settings">
+      <h2>הגדרות</h2>
+
+      <div class="admin-card">
+        <h3>מחיר וזמינות ברירת מחדל</h3>
+        <div class="form-grid">
+          <div class="two-col">
+            <div class="field"><label>מחיר בסיס ללילה (₪, כשאין מחיר מיוחד)</label><input type="number" id="f-basePrice"></div>
+            <div class="field"><label>מינימום לילות להזמנה</label><input type="number" id="f-minNights"></div>
+          </div>
+          <div class="field"><label>אימייל לקבלת פניות</label><input type="email" id="f-contactEmail"></div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:1rem;" id="saveSettingsBtn">שמירה</button>
+        <span class="save-status" id="settingsSaveStatus">נשמר ✓</span>
+      </div>
+
+      <div class="admin-card">
+        <h3>שינוי סיסמת ניהול</h3>
+        <div class="settings-note">שימו לב: זהו אימות פשוט המיועד להדגמה בלבד, מאוחסן בדפדפן זה. לפני שהאתר עולה לאוויר בפועל יש להחליף למערכת התחברות מאובטחת אמיתית.</div>
+        <div class="form-grid">
+          <div class="field"><label>שם משתמש</label><input type="text" id="f-adminUser"></div>
+          <div class="two-col">
+            <div class="field"><label>סיסמה חדשה</label><input type="password" id="f-newPass"></div>
+            <div class="field"><label>אימות סיסמה</label><input type="password" id="f-newPass2"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:1rem;" id="savePassBtn">עדכון סיסמה</button>
+        <span class="save-status" id="passSaveStatus">עודכן ✓</span>
+      </div>
+
+      <div class="admin-card">
+        <h3>איפוס נתוני דמו</h3>
+        <p style="font-size:0.86rem; color:var(--color-ink-soft);">מחזיר את כל התוכן, התמונות והיומן לברירת המחדל המקורית. פעולה זו אינה הפיכה.</p>
+        <button class="btn" id="resetDataBtn">איפוס לברירת מחדל</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

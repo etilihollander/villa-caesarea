@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="metaTitle">Villa Caesarea — Private Luxury Villa Rental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;500;700&family=Jost:wght@300;400;500&family=Assistant:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <a href="#home" class="brand" data-i18n="villaName">Villa Caesarea</a>
+
+  <nav class="main-nav" id="mainNav">
+    <a href="#home" data-i18n="navHome">Home</a>
+    <a href="#about" data-i18n="navAbout">The Villa</a>
+    <a href="#gallery" data-i18n="navGallery">Gallery</a>
+    <a href="#amenities" data-i18n="navAmenities">Amenities</a>
+    <a href="#availability" data-i18n="navAvailability">Availability</a>
+    <a href="#contact" data-i18n="navContact">Enquire</a>
+    <div class="lang-toggle" id="langToggleMobile">
+      <button data-lang="en">EN</button>
+      <button data-lang="he">עב</button>
+    </div>
+  </nav>
+
+  <div style="display:flex; align-items:center; gap:1rem;">
+    <div class="lang-toggle" id="langToggleDesktop">
+      <button data-lang="en">EN</button>
+      <button data-lang="he">עב</button>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">&#9776;</button>
+  </div>
+</header>
+
+<section class="hero" id="home">
+  <img src="images/villa-06.jpg" alt="Villa Caesarea">
+  <div class="hero-content">
+    <span class="eyebrow" data-i18n="tagline">A private estate on Israel's coastline</span>
+    <h1 data-i18n="villaName">Villa Caesarea</h1>
+    <div class="hero-actions">
+      <a href="#availability" class="btn btn-light" data-i18n="heroCta">Check Availability</a>
+    </div>
+  </div>
+  <div class="scroll-cue"></div>
+</section>
+
+<section class="section" id="about">
+  <div class="container about-grid">
+    <div class="about-media">
+      <div class="frame-accent"></div>
+      <img src="images/villa-05.jpg" alt="Villa living room">
+    </div>
+    <div class="about-text">
+      <span class="eyebrow" data-i18n="introEyebrow">Welcome to</span>
+      <h2 data-i18n="introTitle">An address of quiet luxury</h2>
+      <p data-i18n="introText">Villa description...</p>
+
+      <div class="quick-facts">
+        <div class="quick-fact">
+          <span class="num" data-i18n="guests">20</span>
+          <span class="label" data-i18n="guestsLabel">Guests</span>
+        </div>
+        <div class="quick-fact">
+          <span class="num" data-i18n="bedrooms">6</span>
+          <span class="label" data-i18n="bedroomsLabel">Bedrooms</span>
+        </div>
+        <div class="quick-fact">
+          <span class="num" data-i18n="bathrooms">6</span>
+          <span class="label" data-i18n="bathroomsLabel">Bathrooms</span>
+        </div>
+        <div class="quick-fact">
+          <span class="num" data-i18n="area">Caesarea</span>
+          <span class="label" data-i18n="areaLabel">Location</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="gallery">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" data-i18n="galleryTitle">Gallery</span>
+      <h2 data-i18n="gallerySubtitle">A glimpse inside the villa</h2>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <button class="lightbox-prev" id="lightboxPrev">&#8249;</button>
+  <img id="lightboxImg" src="" alt="">
+  <button class="lightbox-next" id="lightboxNext">&#8250;</button>
+</div>
+
+<section class="section" id="amenities">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" data-i18n="amenitiesTitle">Amenities</span>
+      <h2 data-i18n="amenitiesSubtitle">Everything the villa has to offer</h2>
+    </div>
+    <div class="amenities-grid" id="amenitiesGrid"></div>
+  </div>
+</section>
+
+<section class="section section-alt" id="availability">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" data-i18n="availabilityTitle">Availability &amp; Pricing</span>
+      <h2 data-i18n="availabilitySubtitle">Select a date to view nightly rates.</h2>
+    </div>
+
+    <div class="availability-wrap">
+      <div class="calendar-card">
+        <div class="calendar-nav">
+          <button id="calPrev" aria-label="Previous">&#8249;</button>
+          <span class="month-label" id="calMonthLabel"></span>
+          <button id="calNext" aria-label="Next">&#8250;</button>
+        </div>
+        <div class="calendar-months" id="calendarMonths"></div>
+        <div class="calendar-legend">
+          <div class="item"><span class="legend-swatch available"></span><span data-i18n="legendAvailable">Available</span></div>
+          <div class="item"><span class="legend-swatch closed"></span><span data-i18n="legendClosed">Not available</span></div>
+          <div class="item"><span class="legend-swatch selected"></span><span data-i18n="legendSelected">Selected</span></div>
+        </div>
+      </div>
+
+      <div class="booking-summary">
+        <h3 data-i18n="quickFactsTitle">Your Stay</h3>
+        <div class="price-line">
+          <span data-i18n="formCheckin">Check-in</span>
+          <strong id="summaryCheckin">—</strong>
+        </div>
+        <div class="price-line">
+          <span data-i18n="formCheckout">Check-out</span>
+          <strong id="summaryCheckout">—</strong>
+        </div>
+        <div class="price-line">
+          <span data-i18n="minNightsLabel">Minimum stay</span>
+          <strong id="summaryMinNights">—</strong>
+        </div>
+        <div class="total-line">
+          <span data-i18n="fromLabel">From</span>
+          <span id="summaryTotal">—</span>
+        </div>
+        <p class="hint" id="summaryHint" data-i18n="selectDatesPrompt">Select your check-in and check-out dates on the calendar above.</p>
+        <a href="#contact" class="btn btn-primary" data-i18n="navContact">Enquire</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="container contact-grid">
+    <div>
+      <span class="eyebrow" data-i18n="navContact">Enquire</span>
+      <h2 data-i18n="contactTitle">Enquire About Your Stay</h2>
+      <p data-i18n="contactSubtitle" style="margin-top:1rem; max-width:46ch;">Tell us your preferred dates...</p>
+
+      <form class="contact-form" id="contactForm" style="margin-top:2rem;">
+        <div class="field-row">
+          <div class="field">
+            <label data-i18n="formName">Full name</label>
+            <input type="text" name="name" required>
+          </div>
+          <div class="field">
+            <label data-i18n="formEmail">Email</label>
+            <input type="email" name="email" required>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label data-i18n="formPhone">Phone</label>
+            <input type="tel" name="phone">
+          </div>
+          <div class="field">
+            <label data-i18n="formGuests">Number of guests</label>
+            <input type="number" name="guests" min="1" max="20">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label data-i18n="formCheckin">Check-in</label>
+            <input type="date" name="checkin" id="formCheckin">
+          </div>
+          <div class="field">
+            <label data-i18n="formCheckout">Check-out</label>
+            <input type="date" name="checkout" id="formCheckout">
+          </div>
+        </div>
+        <div class="field">
+          <label data-i18n="formMessage">Message</label>
+          <textarea name="message" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" data-i18n="formSubmit">Send Enquiry</button>
+        <div class="form-note" id="formNote" data-i18n="formSuccess"></div>
+      </form>
+    </div>
+    <div class="contact-side">
+      <img src="images/villa-12.jpg" alt="Villa bedroom">
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="brand" data-i18n="villaName">Villa Caesarea</div>
+  <p data-i18n="footerTagline">Villa Caesarea — a private luxury rental</p>
+  <p>&copy; <span id="year"></span> — <span data-i18n="footerRights">All rights reserved.</span></p>
+  <a href="admin.html" class="footer-admin-link">Admin</a>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/site.js"></script>
+</body>
+</html>
