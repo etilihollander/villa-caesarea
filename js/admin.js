@@ -259,15 +259,17 @@
         const isPast = dateObj < today;
         let cls = "mini-day";
         if (isPast) cls += " is-past";
-        else if (info.closed) cls += " is-closed";
+        if (info.closed) cls += " is-closed";
         else if (data.pricing.days[dateKey] && data.pricing.days[dateKey].price) cls += " is-custom-price";
 
         if (selRange.start && dateKey >= selRange.start && dateKey <= (selRange.end || selRange.start)) {
           cls += " is-checked";
         }
 
-        const priceHtml = !isPast ? `<span class="p">${info.closed ? "✕" : fmtMoneyCompact(info.price)}</span>` : "";
-        rowCells += `<td><button type="button" class="${cls}" data-date="${dateKey}" ${isPast ? "disabled" : ""}>${dayNum}${priceHtml}</button></td>`;
+        // admin calendar allows editing past dates too, so actual bookings
+        // can be recorded retroactively for the finance panel
+        const priceHtml = `<span class="p">${info.closed ? "✕" : fmtMoneyCompact(info.price)}</span>`;
+        rowCells += `<td><button type="button" class="${cls}" data-date="${dateKey}">${dayNum}${priceHtml}</button></td>`;
       }
       rows += `<tr>${rowCells}</tr>`;
     }
@@ -291,11 +293,10 @@
       html += buildAdmMonth(y, m);
     }
     wrap.innerHTML = html;
-    $$(".mini-day[data-date]:not([disabled])", wrap).forEach((btn) => {
+    $$(".mini-day[data-date]", wrap).forEach((btn) => {
       btn.addEventListener("click", () => onAdmDayClick(btn.dataset.date));
     });
     $("#admCalRangeLabel").textContent = `${HE_MONTHS[admViewMonth]} ${admViewYear}`;
-    $("#admCalPrev").disabled = admViewYear === today.getFullYear() && admViewMonth === today.getMonth();
   }
 
   function onAdmDayClick(dateKey) {
@@ -378,8 +379,9 @@
   let finance = null;
   let actualByYear = {};
   let actualByMonth = {};
-  let monthlyOverrides = {};
-  let monthlyYear = today.getFullYear();
+  let monthlyOpCostsCache = {};
+  let opCostsYear = today.getFullYear();
+  let opCostsMonth0 = today.getMonth();
 
   function fmtILS(n) {
     return "₪" + Math.round(n).toLocaleString("he-IL");
@@ -387,6 +389,21 @@
 
   function sumCosts(list) {
     return (list || []).reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
+  }
+
+  function currentOpMonthKey() {
+    return `${opCostsYear}-${String(opCostsMonth0 + 1).padStart(2, "0")}`;
+  }
+
+  async function ensureMonthLoaded(monthKey) {
+    if (monthlyOpCostsCache[monthKey]) return;
+    try {
+      const costs = await loadMonthlyOperationalCosts(monthKey);
+      monthlyOpCostsCache[monthKey] = (costs || finance.defaultOperationalCosts).map((c) => ({ ...c }));
+    } catch (err) {
+      console.error(err);
+      monthlyOpCostsCache[monthKey] = finance.defaultOperationalCosts.map((c) => ({ ...c }));
+    }
   }
 
   function renderCostEditor(wrapId, totalId, list) {
@@ -412,7 +429,7 @@
         list[Number(input.dataset.idx)].amount = Number(input.value) || 0;
         renderCostTotal(totalId, list);
         renderForecastTable();
-        renderMonthlyBalanceTable();
+        renderMonthSummaryTable();
       });
     });
     $$("[data-remove]", wrap).forEach((btn) => {
@@ -421,7 +438,7 @@
         renderCostEditor(wrapId, totalId, list);
         renderCostTotal(totalId, list);
         renderForecastTable();
-        renderMonthlyBalanceTable();
+        renderMonthSummaryTable();
       });
     });
     renderCostTotal(totalId, list);
@@ -439,7 +456,7 @@
   }
 
   function renderForecastTable() {
-    const opTotal = sumCosts(finance.operationalCosts);
+    const opTotal = sumCosts(monthlyOpCostsCache[currentOpMonthKey()]);
     const fixedTotal = sumCosts(finance.fixedCosts);
     const table = $("#forecastTable");
     const rows = [];
@@ -486,120 +503,88 @@
     table.innerHTML = head + `<tbody>${body}</tbody>`;
   }
 
-  function computeMonthlyExpenseDefault(nightsClosed) {
-    const opTotal = sumCosts(finance.operationalCosts);
+  function renderMonthSummaryTable() {
+    const monthKey = currentOpMonthKey();
+    const actual = actualByMonth[monthKey] || { nights: 0, income: 0 };
+    const opTotal = sumCosts(monthlyOpCostsCache[monthKey]);
     const fixedTotal = sumCosts(finance.fixedCosts);
-    return nightsClosed * opTotal + fixedTotal / 12;
-  }
-
-  function renderMonthlyBalanceTable() {
-    $("#monthlyYearLabel").textContent = String(monthlyYear);
-    const table = $("#monthlyBalanceTable");
-    const head = `<thead><tr>
-      <th>חודש</th><th>לילות שנסגרו</th><th>הכנסה בפועל</th><th>הוצאה</th><th>מאזן</th>
-    </tr></thead>`;
-    const rows = [];
-    for (let m = 0; m < 12; m++) {
-      const monthKey = `${monthlyYear}-${String(m + 1).padStart(2, "0")}`;
-      const actual = actualByMonth[monthKey] || { nights: 0, income: 0 };
-      const defaultExpense = computeMonthlyExpenseDefault(actual.nights);
-      const override = monthlyOverrides[monthKey];
-      const hasOverride = override !== undefined && override !== null;
-      const expense = hasOverride ? override : defaultExpense;
-      const balance = actual.income - expense;
-      rows.push(`<tr>
-        <td>${HE_MONTHS[m]}</td>
+    const expense = actual.nights * opTotal + fixedTotal / 12;
+    const balance = actual.income - expense;
+    const table = $("#monthSummaryTable");
+    table.innerHTML = `<thead><tr>
+        <th>לילות שנסגרו</th><th>הכנסה בפועל</th><th>הוצאה משוערת לחודש</th><th>מאזן</th>
+      </tr></thead>
+      <tbody><tr>
         <td class="num">${actual.nights}</td>
         <td class="num">${fmtILS(actual.income)}</td>
-        <td class="num">
-          <div class="expense-cell">
-            <input type="number" class="expense-input${hasOverride ? " is-custom" : ""}" data-month="${monthKey}" value="${Math.round(expense)}">
-            ${hasOverride ? `<button type="button" class="reset-expense-btn" data-reset="${monthKey}">איפוס</button>` : ""}
-          </div>
-        </td>
+        <td class="num">${fmtILS(expense)}</td>
         <td class="num">${fmtILS(balance)}</td>
-      </tr>`);
-    }
-    table.innerHTML = head + `<tbody>${rows.join("")}</tbody>`;
-
-    $$(".expense-input", table).forEach((input) => {
-      input.addEventListener("change", async () => {
-        const monthKey = input.dataset.month;
-        const val = Number(input.value) || 0;
-        input.disabled = true;
-        try {
-          await setMonthlyExpenseOverride(monthKey, val);
-          monthlyOverrides[monthKey] = val;
-          renderMonthlyBalanceTable();
-        } catch (err) {
-          alert("שגיאה בשמירה: " + err.message);
-          console.error(err);
-          input.disabled = false;
-        }
-      });
-    });
-    $$("[data-reset]", table).forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const monthKey = btn.dataset.reset;
-        btn.disabled = true;
-        try {
-          await setMonthlyExpenseOverride(monthKey, null);
-          delete monthlyOverrides[monthKey];
-          renderMonthlyBalanceTable();
-        } catch (err) {
-          alert("שגיאה באיפוס: " + err.message);
-          console.error(err);
-          btn.disabled = false;
-        }
-      });
-    });
+      </tr></tbody>`;
   }
 
-  $("#monthlyYearPrev").addEventListener("click", () => {
-    monthlyYear--;
-    renderMonthlyBalanceTable();
+  function renderOpCostsPanel() {
+    const monthKey = currentOpMonthKey();
+    $("#opCostsMonthLabel").textContent = `${HE_MONTHS[opCostsMonth0]} ${opCostsYear}`;
+    renderCostEditor("#opCostsEditor", "#opCostsTotal", monthlyOpCostsCache[monthKey]);
+    renderForecastTable();
+    renderMonthSummaryTable();
+  }
+
+  $("#opCostsMonthPrev").addEventListener("click", async () => {
+    opCostsMonth0--;
+    if (opCostsMonth0 < 0) {
+      opCostsMonth0 = 11;
+      opCostsYear--;
+    }
+    await ensureMonthLoaded(currentOpMonthKey());
+    renderOpCostsPanel();
   });
-  $("#monthlyYearNext").addEventListener("click", () => {
-    monthlyYear++;
-    renderMonthlyBalanceTable();
+  $("#opCostsMonthNext").addEventListener("click", async () => {
+    opCostsMonth0++;
+    if (opCostsMonth0 > 11) {
+      opCostsMonth0 = 0;
+      opCostsYear++;
+    }
+    await ensureMonthLoaded(currentOpMonthKey());
+    renderOpCostsPanel();
   });
 
   async function loadFinancePanel() {
-    renderCostEditor("#opCostsEditor", "#opCostsTotal", finance.operationalCosts);
     renderCostEditor("#fixedCostsEditor", "#fixedCostsTotal", finance.fixedCosts);
     $("#forecastNightsInput").value = finance.forecastNights.join(", ");
     $("#forecastPricesInput").value = finance.forecastPrices.join(", ");
-    renderForecastTable();
 
     $("#actualTable").innerHTML = `<tr class="empty-row"><td>טוען...</td></tr>`;
-    $("#monthlyBalanceTable").innerHTML = `<tr class="empty-row"><td>טוען...</td></tr>`;
     try {
       const stats = await loadActualBookingStats(data.pricing.basePrice);
       actualByYear = stats.byYear;
       actualByMonth = stats.byMonth;
-      monthlyOverrides = await loadMonthlyExpenseOverrides();
     } catch (err) {
       console.error(err);
       $("#actualTable").innerHTML = `<tr class="empty-row"><td>שגיאה בטעינת נתוני ההזמנות בפועל.</td></tr>`;
-      $("#monthlyBalanceTable").innerHTML = `<tr class="empty-row"><td>שגיאה בטעינה.</td></tr>`;
-      return;
     }
     renderActualTable();
-    renderMonthlyBalanceTable();
+
+    opCostsYear = today.getFullYear();
+    opCostsMonth0 = today.getMonth();
+    monthlyOpCostsCache = {};
+    await ensureMonthLoaded(currentOpMonthKey());
+    renderOpCostsPanel();
   }
 
   $("#addOpCostBtn").addEventListener("click", () => {
-    finance.operationalCosts.push({ label: "", amount: 0 });
-    renderCostEditor("#opCostsEditor", "#opCostsTotal", finance.operationalCosts);
+    const monthKey = currentOpMonthKey();
+    monthlyOpCostsCache[monthKey].push({ label: "", amount: 0 });
+    renderCostEditor("#opCostsEditor", "#opCostsTotal", monthlyOpCostsCache[monthKey]);
     renderForecastTable();
-    renderMonthlyBalanceTable();
+    renderMonthSummaryTable();
   });
 
   $("#addFixedCostBtn").addEventListener("click", () => {
     finance.fixedCosts.push({ label: "", amount: 0 });
     renderCostEditor("#fixedCostsEditor", "#fixedCostsTotal", finance.fixedCosts);
     renderForecastTable();
-    renderMonthlyBalanceTable();
+    renderMonthSummaryTable();
   });
 
   $("#forecastNightsInput").addEventListener("input", (e) => {
@@ -616,7 +601,8 @@
     const btn = $("#saveFinanceBtn");
     btn.disabled = true;
     try {
-      await updateFinanceSettings(finance);
+      const monthKey = currentOpMonthKey();
+      await Promise.all([updateFinanceSettings(finance), setMonthlyOperationalCosts(monthKey, monthlyOpCostsCache[monthKey])]);
       flashStatus("#financeSaveStatus");
     } catch (err) {
       alert("שגיאה בשמירה: " + err.message);
