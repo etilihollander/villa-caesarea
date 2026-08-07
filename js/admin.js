@@ -376,6 +376,10 @@
 
   /* ---------------- Finance panel ---------------- */
   let finance = null;
+  let actualByYear = {};
+  let actualByMonth = {};
+  let monthlyOverrides = {};
+  let monthlyYear = today.getFullYear();
 
   function fmtILS(n) {
     return "₪" + Math.round(n).toLocaleString("he-IL");
@@ -408,6 +412,7 @@
         list[Number(input.dataset.idx)].amount = Number(input.value) || 0;
         renderCostTotal(totalId, list);
         renderForecastTable();
+        renderMonthlyBalanceTable();
       });
     });
     $$("[data-remove]", wrap).forEach((btn) => {
@@ -416,6 +421,7 @@
         renderCostEditor(wrapId, totalId, list);
         renderCostTotal(totalId, list);
         renderForecastTable();
+        renderMonthlyBalanceTable();
       });
     });
     renderCostTotal(totalId, list);
@@ -466,46 +472,134 @@
     table.innerHTML = head + `<tbody>${body}</tbody>`;
   }
 
-  async function renderActualTable() {
+  function renderActualTable() {
     const table = $("#actualTable");
-    table.innerHTML = `<tr class="empty-row"><td>טוען...</td></tr>`;
-    try {
-      const byYear = await loadActualBookingStats(data.pricing.basePrice);
-      const years = Object.keys(byYear).sort();
-      if (!years.length) {
-        table.innerHTML = `<tr class="empty-row"><td>אין עדיין תאריכים שסומנו כתפוסים ביומן.</td></tr>`;
-        return;
-      }
-      const head = `<thead><tr><th>שנה</th><th>לילות שהוזמנו בפועל</th><th>הכנסה משוערת בפועל</th></tr></thead>`;
-      const body = years
-        .map((y) => `<tr><td>${y}</td><td class="num">${byYear[y].nights}</td><td class="num">${fmtILS(byYear[y].income)}</td></tr>`)
-        .join("");
-      table.innerHTML = head + `<tbody>${body}</tbody>`;
-    } catch (err) {
-      table.innerHTML = `<tr class="empty-row"><td>שגיאה בטעינת נתוני ההזמנות בפועל.</td></tr>`;
-      console.error(err);
+    const years = Object.keys(actualByYear).sort();
+    if (!years.length) {
+      table.innerHTML = `<tr class="empty-row"><td>אין עדיין תאריכים שסומנו כתפוסים ביומן.</td></tr>`;
+      return;
     }
+    const head = `<thead><tr><th>שנה</th><th>לילות שהוזמנו בפועל</th><th>הכנסה משוערת בפועל</th></tr></thead>`;
+    const body = years
+      .map((y) => `<tr><td>${y}</td><td class="num">${actualByYear[y].nights}</td><td class="num">${fmtILS(actualByYear[y].income)}</td></tr>`)
+      .join("");
+    table.innerHTML = head + `<tbody>${body}</tbody>`;
   }
 
-  function loadFinancePanel() {
+  function computeMonthlyExpenseDefault(nightsClosed) {
+    const opTotal = sumCosts(finance.operationalCosts);
+    const fixedTotal = sumCosts(finance.fixedCosts);
+    return nightsClosed * opTotal + fixedTotal / 12;
+  }
+
+  function renderMonthlyBalanceTable() {
+    $("#monthlyYearLabel").textContent = String(monthlyYear);
+    const table = $("#monthlyBalanceTable");
+    const head = `<thead><tr>
+      <th>חודש</th><th>לילות שנסגרו</th><th>הכנסה בפועל</th><th>הוצאה</th><th>מאזן</th>
+    </tr></thead>`;
+    const rows = [];
+    for (let m = 0; m < 12; m++) {
+      const monthKey = `${monthlyYear}-${String(m + 1).padStart(2, "0")}`;
+      const actual = actualByMonth[monthKey] || { nights: 0, income: 0 };
+      const defaultExpense = computeMonthlyExpenseDefault(actual.nights);
+      const override = monthlyOverrides[monthKey];
+      const hasOverride = override !== undefined && override !== null;
+      const expense = hasOverride ? override : defaultExpense;
+      const balance = actual.income - expense;
+      rows.push(`<tr>
+        <td>${HE_MONTHS[m]}</td>
+        <td class="num">${actual.nights}</td>
+        <td class="num">${fmtILS(actual.income)}</td>
+        <td class="num">
+          <div class="expense-cell">
+            <input type="number" class="expense-input${hasOverride ? " is-custom" : ""}" data-month="${monthKey}" value="${Math.round(expense)}">
+            ${hasOverride ? `<button type="button" class="reset-expense-btn" data-reset="${monthKey}">איפוס</button>` : ""}
+          </div>
+        </td>
+        <td class="num">${fmtILS(balance)}</td>
+      </tr>`);
+    }
+    table.innerHTML = head + `<tbody>${rows.join("")}</tbody>`;
+
+    $$(".expense-input", table).forEach((input) => {
+      input.addEventListener("change", async () => {
+        const monthKey = input.dataset.month;
+        const val = Number(input.value) || 0;
+        input.disabled = true;
+        try {
+          await setMonthlyExpenseOverride(monthKey, val);
+          monthlyOverrides[monthKey] = val;
+          renderMonthlyBalanceTable();
+        } catch (err) {
+          alert("שגיאה בשמירה: " + err.message);
+          console.error(err);
+          input.disabled = false;
+        }
+      });
+    });
+    $$("[data-reset]", table).forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const monthKey = btn.dataset.reset;
+        btn.disabled = true;
+        try {
+          await setMonthlyExpenseOverride(monthKey, null);
+          delete monthlyOverrides[monthKey];
+          renderMonthlyBalanceTable();
+        } catch (err) {
+          alert("שגיאה באיפוס: " + err.message);
+          console.error(err);
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  $("#monthlyYearPrev").addEventListener("click", () => {
+    monthlyYear--;
+    renderMonthlyBalanceTable();
+  });
+  $("#monthlyYearNext").addEventListener("click", () => {
+    monthlyYear++;
+    renderMonthlyBalanceTable();
+  });
+
+  async function loadFinancePanel() {
     renderCostEditor("#opCostsEditor", "#opCostsTotal", finance.operationalCosts);
     renderCostEditor("#fixedCostsEditor", "#fixedCostsTotal", finance.fixedCosts);
     $("#forecastNightsInput").value = finance.forecastNights.join(", ");
     $("#forecastPricesInput").value = finance.forecastPrices.join(", ");
     renderForecastTable();
+
+    $("#actualTable").innerHTML = `<tr class="empty-row"><td>טוען...</td></tr>`;
+    $("#monthlyBalanceTable").innerHTML = `<tr class="empty-row"><td>טוען...</td></tr>`;
+    try {
+      const stats = await loadActualBookingStats(data.pricing.basePrice);
+      actualByYear = stats.byYear;
+      actualByMonth = stats.byMonth;
+      monthlyOverrides = await loadMonthlyExpenseOverrides();
+    } catch (err) {
+      console.error(err);
+      $("#actualTable").innerHTML = `<tr class="empty-row"><td>שגיאה בטעינת נתוני ההזמנות בפועל.</td></tr>`;
+      $("#monthlyBalanceTable").innerHTML = `<tr class="empty-row"><td>שגיאה בטעינה.</td></tr>`;
+      return;
+    }
     renderActualTable();
+    renderMonthlyBalanceTable();
   }
 
   $("#addOpCostBtn").addEventListener("click", () => {
     finance.operationalCosts.push({ label: "", amount: 0 });
     renderCostEditor("#opCostsEditor", "#opCostsTotal", finance.operationalCosts);
     renderForecastTable();
+    renderMonthlyBalanceTable();
   });
 
   $("#addFixedCostBtn").addEventListener("click", () => {
     finance.fixedCosts.push({ label: "", amount: 0 });
     renderCostEditor("#fixedCostsEditor", "#fixedCostsTotal", finance.fixedCosts);
     renderForecastTable();
+    renderMonthlyBalanceTable();
   });
 
   $("#forecastNightsInput").addEventListener("input", (e) => {
@@ -594,7 +688,7 @@
     renderMiniCalendars();
     updateRangeSummary();
     finance = await loadFinanceSettings();
-    loadFinancePanel();
+    await loadFinancePanel();
     await loadSettingsForm();
 
     if (!unsubscribe) {

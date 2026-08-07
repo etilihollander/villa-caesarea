@@ -234,18 +234,48 @@ async function updateFinanceSettings({ operationalCosts, fixedCosts, forecastNig
 
 // Actual bookings are derived from calendar days marked "closed" in the
 // admin calendar — the site has no separate reservations table, so this is
-// the closest proxy to real bookings, grouped by year.
+// the closest proxy to real bookings, grouped by year and by month.
 async function loadActualBookingStats(basePrice) {
   const { data: days, error } = await sb.from("calendar_days").select("day, price, closed").eq("closed", true);
   if (error) throw error;
   const byYear = {};
+  const byMonth = {};
   (days || []).forEach((row) => {
     const year = row.day.slice(0, 4);
+    const month = row.day.slice(0, 7); // "YYYY-MM"
+    const income = Number(row.price) || basePrice;
     if (!byYear[year]) byYear[year] = { nights: 0, income: 0 };
     byYear[year].nights += 1;
-    byYear[year].income += Number(row.price) || basePrice;
+    byYear[year].income += income;
+    if (!byMonth[month]) byMonth[month] = { nights: 0, income: 0 };
+    byMonth[month].nights += 1;
+    byMonth[month].income += income;
   });
-  return byYear;
+  return { byYear, byMonth };
+}
+
+/* ---------------- Monthly expense overrides (admin only) ---------------- */
+
+async function loadMonthlyExpenseOverrides() {
+  const { data, error } = await sb.from("monthly_expenses").select("*");
+  if (error) throw error;
+  const map = {};
+  (data || []).forEach((row) => {
+    map[row.month] = row.amount === null ? null : Number(row.amount);
+  });
+  return map;
+}
+
+async function setMonthlyExpenseOverride(month, amount) {
+  if (amount === null) {
+    const { error } = await sb.from("monthly_expenses").delete().eq("month", month);
+    if (error) throw error;
+    return;
+  }
+  const { error } = await sb
+    .from("monthly_expenses")
+    .upsert({ month, amount, updated_at: new Date().toISOString() }, { onConflict: "month" });
+  if (error) throw error;
 }
 
 /* ---------------- Auth (admin login) ---------------- */
