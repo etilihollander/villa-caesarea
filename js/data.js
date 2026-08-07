@@ -205,6 +205,49 @@ async function setHeroImage(id) {
   if (error) throw error;
 }
 
+/* ---------------- Finance panel (admin only) ---------------- */
+
+async function loadFinanceSettings() {
+  const { data, error } = await sb.from("finance_settings").select("*").eq("id", 1).single();
+  if (error) throw error;
+  return {
+    operationalCosts: data.operational_costs || [],
+    fixedCosts: data.fixed_costs || [],
+    forecastNights: data.forecast_nights || [],
+    forecastPrices: data.forecast_prices || []
+  };
+}
+
+async function updateFinanceSettings({ operationalCosts, fixedCosts, forecastNights, forecastPrices }) {
+  const { error } = await sb
+    .from("finance_settings")
+    .update({
+      operational_costs: operationalCosts,
+      fixed_costs: fixedCosts,
+      forecast_nights: forecastNights,
+      forecast_prices: forecastPrices,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", 1);
+  if (error) throw error;
+}
+
+// Actual bookings are derived from calendar days marked "closed" in the
+// admin calendar — the site has no separate reservations table, so this is
+// the closest proxy to real bookings, grouped by year.
+async function loadActualBookingStats(basePrice) {
+  const { data: days, error } = await sb.from("calendar_days").select("day, price, closed").eq("closed", true);
+  if (error) throw error;
+  const byYear = {};
+  (days || []).forEach((row) => {
+    const year = row.day.slice(0, 4);
+    if (!byYear[year]) byYear[year] = { nights: 0, income: 0 };
+    byYear[year].nights += 1;
+    byYear[year].income += Number(row.price) || basePrice;
+  });
+  return byYear;
+}
+
 /* ---------------- Auth (admin login) ---------------- */
 
 async function adminSignIn(email, password) {
