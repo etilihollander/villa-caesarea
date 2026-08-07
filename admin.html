@@ -194,6 +194,19 @@
           <table class="finance-table" id="actualTable"></table>
         </div>
       </div>
+
+      <div class="admin-card">
+        <h3>מאזן חודשי</h3>
+        <p class="desc" style="margin-bottom:1rem;">הכנסה ומספר לילות שנסגרו מחושבים אוטומטית מיומן האתר. ההוצאה החודשית מחושבת כברירת מחדל מהעלויות שהוגדרו למעלה (עלות תפעול ללילה × לילות שנסגרו, ועלות קבועה חלקית חודשית), אך אפשר לערוך אותה ידנית לכל חודש בנפרד — למשל אם הייתה באותו חודש הוצאה חריגה. עריכת שדה ההוצאה נשמרת אוטומטית.</p>
+        <div class="range-nav" style="margin-bottom:1rem;">
+          <button type="button" id="monthlyYearPrev">&#8249;</button>
+          <strong id="monthlyYearLabel"></strong>
+          <button type="button" id="monthlyYearNext">&#8250;</button>
+        </div>
+        <div class="finance-table-wrap">
+          <table class="finance-table" id="monthlyBalanceTable"></table>
+        </div>
+      </div>
     </section>
 
     <!-- ---- SETTINGS PANEL ---- -->
