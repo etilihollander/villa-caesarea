@@ -211,24 +211,41 @@ async function loadFinanceSettings() {
   const { data, error } = await sb.from("finance_settings").select("*").eq("id", 1).single();
   if (error) throw error;
   return {
-    operationalCosts: data.operational_costs || [],
+    // used to seed a month that has no operational-cost entry of its own yet
+    defaultOperationalCosts: data.operational_costs || [],
     fixedCosts: data.fixed_costs || [],
     forecastNights: data.forecast_nights || [],
     forecastPrices: data.forecast_prices || []
   };
 }
 
-async function updateFinanceSettings({ operationalCosts, fixedCosts, forecastNights, forecastPrices }) {
+async function updateFinanceSettings({ fixedCosts, forecastNights, forecastPrices }) {
   const { error } = await sb
     .from("finance_settings")
     .update({
-      operational_costs: operationalCosts,
       fixed_costs: fixedCosts,
       forecast_nights: forecastNights,
       forecast_prices: forecastPrices,
       updated_at: new Date().toISOString()
     })
     .eq("id", 1);
+  if (error) throw error;
+}
+
+/* ---------------- Monthly operational costs (admin only) ---------------- */
+
+// Returns null when the month has no entry of its own yet (caller should
+// fall back to defaultOperationalCosts from loadFinanceSettings).
+async function loadMonthlyOperationalCosts(month) {
+  const { data, error } = await sb.from("monthly_operational_costs").select("costs").eq("month", month).maybeSingle();
+  if (error) throw error;
+  return data ? data.costs : null;
+}
+
+async function setMonthlyOperationalCosts(month, costs) {
+  const { error } = await sb
+    .from("monthly_operational_costs")
+    .upsert({ month, costs, updated_at: new Date().toISOString() }, { onConflict: "month" });
   if (error) throw error;
 }
 
@@ -252,30 +269,6 @@ async function loadActualBookingStats(basePrice) {
     byMonth[month].income += income;
   });
   return { byYear, byMonth };
-}
-
-/* ---------------- Monthly expense overrides (admin only) ---------------- */
-
-async function loadMonthlyExpenseOverrides() {
-  const { data, error } = await sb.from("monthly_expenses").select("*");
-  if (error) throw error;
-  const map = {};
-  (data || []).forEach((row) => {
-    map[row.month] = row.amount === null ? null : Number(row.amount);
-  });
-  return map;
-}
-
-async function setMonthlyExpenseOverride(month, amount) {
-  if (amount === null) {
-    const { error } = await sb.from("monthly_expenses").delete().eq("month", month);
-    if (error) throw error;
-    return;
-  }
-  const { error } = await sb
-    .from("monthly_expenses")
-    .upsert({ month, amount, updated_at: new Date().toISOString() }, { onConflict: "month" });
-  if (error) throw error;
 }
 
 /* ---------------- Auth (admin login) ---------------- */

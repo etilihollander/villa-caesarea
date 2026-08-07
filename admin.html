@@ -148,11 +148,24 @@
 
       <div class="admin-card">
         <h3>עלויות תפעול ללילה השכרה</h3>
-        <p class="desc" style="margin-bottom:1rem;">עלויות משתנות שחלות על כל לילה שמושכר בפועל (למשל חשמל, ניקיון, דמי תיווך).</p>
+        <p class="desc" style="margin-bottom:1rem;">עלויות משתנות שחלות על כל לילה שמושכר בפועל (למשל חשמל, ניקיון, דמי תיווך). ניתן להגדיר עלויות שונות לכל חודש בנפרד — נעו בין החודשים עם החצים.</p>
+        <div class="range-nav" style="margin-bottom:1rem;">
+          <button type="button" id="opCostsMonthPrev">&#8249;</button>
+          <strong id="opCostsMonthLabel"></strong>
+          <button type="button" id="opCostsMonthNext">&#8250;</button>
+        </div>
         <div class="cost-table-head"><span>סעיף</span><span>עלות ללילה (₪)</span><span></span></div>
         <div class="cost-table" id="opCostsEditor"></div>
         <button type="button" class="add-cost-btn" id="addOpCostBtn">+ הוספת סעיף</button>
         <div class="cost-total" id="opCostsTotal"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3>הוצאות והכנסות החודש</h3>
+        <p class="desc" style="margin-bottom:1rem;">מחושב לפי עלויות התפעול של החודש שנבחר למעלה, החלק היחסי מהעלויות הקבועות השנתיות (מחולק ל-12), ולפי הלילות שנסגרו בפועל ביומן באותו חודש.</p>
+        <div class="finance-table-wrap">
+          <table class="finance-table" id="monthSummaryTable"></table>
+        </div>
       </div>
 
       <div class="admin-card">
@@ -195,18 +208,6 @@
         </div>
       </div>
 
-      <div class="admin-card">
-        <h3>מאזן חודשי</h3>
-        <p class="desc" style="margin-bottom:1rem;">הכנסה ומספר לילות שנסגרו מחושבים אוטומטית מיומן האתר. ההוצאה החודשית מחושבת כברירת מחדל מהעלויות שהוגדרו למעלה (עלות תפעול ללילה × לילות שנסגרו, ועלות קבועה חלקית חודשית), אך אפשר לערוך אותה ידנית לכל חודש בנפרד — למשל אם הייתה באותו חודש הוצאה חריגה. עריכת שדה ההוצאה נשמרת אוטומטית.</p>
-        <div class="range-nav" style="margin-bottom:1rem;">
-          <button type="button" id="monthlyYearPrev">&#8249;</button>
-          <strong id="monthlyYearLabel"></strong>
-          <button type="button" id="monthlyYearNext">&#8250;</button>
-        </div>
-        <div class="finance-table-wrap">
-          <table class="finance-table" id="monthlyBalanceTable"></table>
-        </div>
-      </div>
     </section>
 
     <!-- ---- SETTINGS PANEL ---- -->

@@ -255,7 +255,7 @@ body.admin-body {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .mini-day.is-empty { visibility: hidden; }
-.mini-day.is-past { color: #ccc; cursor: default; }
+.mini-day.is-past { color: #a39c8a; }
 .mini-day.is-closed { background: #f4e0da; color: var(--color-closed); text-decoration: line-through; }
 .mini-day.is-custom-price { background: #efe4d3; }
 .mini-day.is-checked {
