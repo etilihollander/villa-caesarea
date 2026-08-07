@@ -272,14 +272,6 @@ html[dir="rtl"] .main-nav a { letter-spacing: 0.02em; }
 }
 .about-media { position: relative; }
 .about-media img { border-radius: var(--radius); }
-.about-media .frame-accent {
-  position: absolute;
-  top: -18px; left: -18px;
-  width: 65%; height: 65%;
-  border: 1px solid var(--color-accent);
-  z-index: -1;
-}
-html[dir="rtl"] .about-media .frame-accent { left: auto; right: -18px; }
 .about-text .eyebrow { display: block; margin-bottom: 0.6rem; }
 .about-text h2 { margin-bottom: 1.3rem; }
 .about-text p { font-size: 1.02rem; }
