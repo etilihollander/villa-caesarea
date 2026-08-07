@@ -374,6 +374,164 @@
     renderMiniCalendars();
   });
 
+  /* ---------------- Finance panel ---------------- */
+  let finance = null;
+
+  function fmtILS(n) {
+    return "₪" + Math.round(n).toLocaleString("he-IL");
+  }
+
+  function sumCosts(list) {
+    return (list || []).reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
+  }
+
+  function renderCostEditor(wrapId, totalId, list) {
+    const wrap = $(wrapId);
+    wrap.innerHTML = "";
+    list.forEach((item, idx) => {
+      const row = document.createElement("div");
+      row.className = "cost-row";
+      row.innerHTML = `
+        <input type="text" value="${escapeAttr(item.label)}" data-field="label" data-idx="${idx}">
+        <input type="number" value="${item.amount}" data-field="amount" data-idx="${idx}">
+        <button type="button" data-remove="${idx}" title="הסרה">&times;</button>
+      `;
+      wrap.appendChild(row);
+    });
+    $$('input[data-field="label"]', wrap).forEach((input) => {
+      input.addEventListener("input", () => {
+        list[Number(input.dataset.idx)].label = input.value;
+      });
+    });
+    $$('input[data-field="amount"]', wrap).forEach((input) => {
+      input.addEventListener("input", () => {
+        list[Number(input.dataset.idx)].amount = Number(input.value) || 0;
+        renderCostTotal(totalId, list);
+        renderForecastTable();
+      });
+    });
+    $$("[data-remove]", wrap).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        list.splice(Number(btn.dataset.remove), 1);
+        renderCostEditor(wrapId, totalId, list);
+        renderCostTotal(totalId, list);
+        renderForecastTable();
+      });
+    });
+    renderCostTotal(totalId, list);
+  }
+
+  function renderCostTotal(totalId, list) {
+    $(totalId).innerHTML = `<span>סה״כ</span><span>${fmtILS(sumCosts(list))}</span>`;
+  }
+
+  function parseNumberList(str) {
+    return String(str || "")
+      .split(",")
+      .map((s) => Number(s.trim()))
+      .filter((n) => n > 0);
+  }
+
+  function renderForecastTable() {
+    const opTotal = sumCosts(finance.operationalCosts);
+    const fixedTotal = sumCosts(finance.fixedCosts);
+    const table = $("#forecastTable");
+    const rows = [];
+    finance.forecastPrices.forEach((price) => {
+      finance.forecastNights.forEach((nights) => {
+        const income = nights * price;
+        const expense = nights * opTotal + fixedTotal;
+        const remaining = income - expense;
+        rows.push({ nights, price, income, expense, remaining });
+      });
+    });
+    if (!rows.length) {
+      table.innerHTML = `<tr class="empty-row"><td>הזינו מספרי לילות ומחירים כדי לראות תחזית.</td></tr>`;
+      return;
+    }
+    const head = `<thead><tr>
+      <th>לילות</th><th>מחיר ללילה</th><th>הכנסה שנתית</th><th>הוצאה שנתית</th><th>סה״כ נשאר</th>
+    </tr></thead>`;
+    const body = rows
+      .map(
+        (r) => `<tr>
+          <td class="num">${r.nights}</td>
+          <td class="num">${fmtILS(r.price)}</td>
+          <td class="num">${fmtILS(r.income)}</td>
+          <td class="num">${fmtILS(r.expense)}</td>
+          <td class="num">${fmtILS(r.remaining)}</td>
+        </tr>`
+      )
+      .join("");
+    table.innerHTML = head + `<tbody>${body}</tbody>`;
+  }
+
+  async function renderActualTable() {
+    const table = $("#actualTable");
+    table.innerHTML = `<tr class="empty-row"><td>טוען...</td></tr>`;
+    try {
+      const byYear = await loadActualBookingStats(data.pricing.basePrice);
+      const years = Object.keys(byYear).sort();
+      if (!years.length) {
+        table.innerHTML = `<tr class="empty-row"><td>אין עדיין תאריכים שסומנו כתפוסים ביומן.</td></tr>`;
+        return;
+      }
+      const head = `<thead><tr><th>שנה</th><th>לילות שהוזמנו בפועל</th><th>הכנסה משוערת בפועל</th></tr></thead>`;
+      const body = years
+        .map((y) => `<tr><td>${y}</td><td class="num">${byYear[y].nights}</td><td class="num">${fmtILS(byYear[y].income)}</td></tr>`)
+        .join("");
+      table.innerHTML = head + `<tbody>${body}</tbody>`;
+    } catch (err) {
+      table.innerHTML = `<tr class="empty-row"><td>שגיאה בטעינת נתוני ההזמנות בפועל.</td></tr>`;
+      console.error(err);
+    }
+  }
+
+  function loadFinancePanel() {
+    renderCostEditor("#opCostsEditor", "#opCostsTotal", finance.operationalCosts);
+    renderCostEditor("#fixedCostsEditor", "#fixedCostsTotal", finance.fixedCosts);
+    $("#forecastNightsInput").value = finance.forecastNights.join(", ");
+    $("#forecastPricesInput").value = finance.forecastPrices.join(", ");
+    renderForecastTable();
+    renderActualTable();
+  }
+
+  $("#addOpCostBtn").addEventListener("click", () => {
+    finance.operationalCosts.push({ label: "", amount: 0 });
+    renderCostEditor("#opCostsEditor", "#opCostsTotal", finance.operationalCosts);
+    renderForecastTable();
+  });
+
+  $("#addFixedCostBtn").addEventListener("click", () => {
+    finance.fixedCosts.push({ label: "", amount: 0 });
+    renderCostEditor("#fixedCostsEditor", "#fixedCostsTotal", finance.fixedCosts);
+    renderForecastTable();
+  });
+
+  $("#forecastNightsInput").addEventListener("input", (e) => {
+    finance.forecastNights = parseNumberList(e.target.value);
+    renderForecastTable();
+  });
+
+  $("#forecastPricesInput").addEventListener("input", (e) => {
+    finance.forecastPrices = parseNumberList(e.target.value);
+    renderForecastTable();
+  });
+
+  $("#saveFinanceBtn").addEventListener("click", async () => {
+    const btn = $("#saveFinanceBtn");
+    btn.disabled = true;
+    try {
+      await updateFinanceSettings(finance);
+      flashStatus("#financeSaveStatus");
+    } catch (err) {
+      alert("שגיאה בשמירה: " + err.message);
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
   /* ---------------- Settings panel ---------------- */
   async function loadSettingsForm() {
     $("#f-basePrice").value = data.pricing.basePrice;
@@ -435,6 +593,8 @@
     renderImages();
     renderMiniCalendars();
     updateRangeSummary();
+    finance = await loadFinanceSettings();
+    loadFinancePanel();
     await loadSettingsForm();
 
     if (!unsubscribe) {
