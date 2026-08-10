@@ -46,6 +46,8 @@
       if (typeof val === "string") el.textContent = val;
     });
     applyLangUI();
+    renderHero();
+    renderAboutImage();
     renderAmenities();
     renderGallery();
     renderCalendarMonths();
@@ -75,6 +77,53 @@
   const mainNav = $("#mainNav");
   navToggle.addEventListener("click", () => mainNav.classList.toggle("open"));
   $$("#mainNav a").forEach((a) => a.addEventListener("click", () => mainNav.classList.remove("open")));
+
+  /* ---------------- Hero slideshow ---------------- */
+  let heroSlideIndex = 0;
+  let heroAutoplayTimer = null;
+  const heroSlidesEl = $("#heroSlides");
+  const heroDotsEl = $("#heroDots");
+
+  function renderHero() {
+    const heroImages = data.images.filter((img) => img.isHero);
+    const slides = heroImages.length ? heroImages : [data.images[0]];
+    const villaName = data.content[lang].villaName;
+
+    heroSlidesEl.innerHTML = slides
+      .map((img, i) => `<img class="hero-slide${i === 0 ? " is-active" : ""}" src="${img.file}" alt="${villaName}">`)
+      .join("");
+    heroDotsEl.innerHTML = slides
+      .map((_, i) => `<button type="button" class="hero-dot${i === 0 ? " is-active" : ""}" data-slide="${i}"></button>`)
+      .join("");
+    $$(".hero-dot", heroDotsEl).forEach((dot) => {
+      dot.addEventListener("click", () => goToHeroSlide(Number(dot.dataset.slide)));
+    });
+
+    const multi = slides.length > 1;
+    $("#heroPrev").hidden = !multi;
+    $("#heroNext").hidden = !multi;
+    heroDotsEl.hidden = !multi;
+
+    heroSlideIndex = 0;
+    clearInterval(heroAutoplayTimer);
+    if (multi) heroAutoplayTimer = setInterval(() => goToHeroSlide(heroSlideIndex + 1), 6000);
+  }
+
+  function goToHeroSlide(i) {
+    const slides = $$(".hero-slide", heroSlidesEl);
+    heroSlideIndex = (i + slides.length) % slides.length;
+    slides.forEach((el, idx) => el.classList.toggle("is-active", idx === heroSlideIndex));
+    $$(".hero-dot", heroDotsEl).forEach((el, idx) => el.classList.toggle("is-active", idx === heroSlideIndex));
+  }
+
+  $("#heroPrev").addEventListener("click", () => goToHeroSlide(heroSlideIndex - 1));
+  $("#heroNext").addEventListener("click", () => goToHeroSlide(heroSlideIndex + 1));
+
+  /* ---------------- About-section image ---------------- */
+  function renderAboutImage() {
+    const aboutImg = data.images.find((img) => img.isAbout) || data.images[1] || data.images[0];
+    if (aboutImg) $("#aboutImage").src = aboutImg.file;
+  }
 
   /* ---------------- Gallery ---------------- */
   function renderGallery() {
