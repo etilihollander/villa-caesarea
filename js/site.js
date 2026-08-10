@@ -48,6 +48,7 @@
     applyLangUI();
     renderHero();
     renderAboutImage();
+    renderPriceRange();
     renderAmenities();
     renderGallery();
     renderCalendarMonths();
@@ -189,6 +190,20 @@
   function fmtMoneyCompact(n) {
     if (n >= 1000) return data.pricing.currencySymbol + Math.round(n / 1000) + "k";
     return data.pricing.currencySymbol + n;
+  }
+
+  /* ---------------- Villa-section price range ---------------- */
+  function renderPriceRange() {
+    let min = data.pricing.basePrice;
+    let max = data.pricing.basePrice;
+    Object.values(data.pricing.days).forEach((day) => {
+      if (day.closed || !day.price) return;
+      if (day.price < min) min = day.price;
+      if (day.price > max) max = day.price;
+    });
+    const suffix = " " + t("perNight").replace("/ ", "");
+    $("#priceFrom").textContent = fmtMoney(min) + suffix;
+    $("#priceTo").textContent = fmtMoney(max) + suffix;
   }
 
   function buildMonthTable(year, month) {
