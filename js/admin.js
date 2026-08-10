@@ -88,7 +88,6 @@
     $("#f-introTitle").value = c.introTitle;
     $("#f-introText").value = c.introText;
     $("#f-secondTitle").value = c.secondTitle;
-    $("#f-secondText").value = c.secondText;
     renderAmenitiesEditor();
   }
 
@@ -141,7 +140,6 @@
     c.introTitle = $("#f-introTitle").value;
     c.introText = $("#f-introText").value;
     c.secondTitle = $("#f-secondTitle").value;
-    c.secondText = $("#f-secondText").value;
     c.amenities = $$("#amenitiesEditor input").map((i) => i.value).filter((v) => v.trim() !== "");
     const btn = $("#saveContentBtn");
     btn.disabled = true;
