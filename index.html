@@ -32,7 +32,10 @@
 </header>
 
 <section class="hero" id="home">
-  <img src="images/villa-06.jpg" alt="Villa Caesarea">
+  <div class="hero-slides" id="heroSlides"></div>
+  <button type="button" class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous photo">&#8249;</button>
+  <button type="button" class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next photo">&#8250;</button>
+  <div class="hero-dots" id="heroDots"></div>
   <div class="hero-content">
     <span class="eyebrow" data-i18n="tagline">A private estate on Israel's coastline</span>
     <h1 data-i18n="villaName">Villa Caesarea</h1>
@@ -46,7 +49,7 @@
 <section class="section" id="about">
   <div class="container about-grid">
     <div class="about-media">
-      <img src="images/villa-05.jpg" alt="Villa living room">
+      <img id="aboutImage" src="images/villa-05.jpg" alt="Villa Caesarea">
     </div>
     <div class="about-text">
       <span class="eyebrow" data-i18n="introEyebrow">Welcome to</span>

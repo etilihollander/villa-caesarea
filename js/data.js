@@ -54,7 +54,7 @@ async function loadData() {
       en: contentRow.content_en,
       he: contentRow.content_he
     },
-    images: sortedImages.map((img) => ({ id: img.id, file: img.url, tag: img.tag, isHero: img.is_hero })),
+    images: sortedImages.map((img) => ({ id: img.id, file: img.url, tag: img.tag, isHero: img.is_hero, isAbout: img.is_about })),
     pricing: {
       currency: "ILS",
       currencySymbol: contentRow.currency_symbol,
@@ -198,10 +198,17 @@ async function deleteImageRow(id, url) {
   }
 }
 
-async function setHeroImage(id) {
-  const { error: clearErr } = await sb.from("villa_images").update({ is_hero: false }).eq("is_hero", true);
+// multiple images can be part of the home slideshow at once
+async function toggleHeroImage(id, isHero) {
+  const { error } = await sb.from("villa_images").update({ is_hero: isHero }).eq("id", id);
+  if (error) throw error;
+}
+
+// only one image can be the villa/about-section image at a time
+async function setAboutImage(id) {
+  const { error: clearErr } = await sb.from("villa_images").update({ is_about: false }).eq("is_about", true);
   if (clearErr) throw clearErr;
-  const { error } = await sb.from("villa_images").update({ is_hero: true }).eq("id", id);
+  const { error } = await sb.from("villa_images").update({ is_about: true }).eq("id", id);
   if (error) throw error;
 }
 

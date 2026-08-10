@@ -165,27 +165,45 @@
       tile.className = "image-tile";
       tile.innerHTML = `
         <img src="${img.file}" alt="">
-        ${img.isHero ? '<span class="hero-badge">הירו</span>' : ""}
+        ${img.isHero ? '<span class="hero-badge">בסלייד הבית</span>' : ""}
+        ${img.isAbout ? '<span class="about-badge">תמונת הוילה</span>' : ""}
         <span class="tag-badge">${img.tag || ""}</span>
       `;
       const actions = document.createElement("div");
-      actions.style.cssText = "position:absolute;top:6px;left:6px;display:flex;gap:4px;";
-      if (!img.isHero) {
-        const heroBtn = document.createElement("button");
-        heroBtn.type = "button";
-        heroBtn.textContent = "הפוך להירו";
-        heroBtn.style.cssText = "font-size:0.6rem;background:#fff;border:none;padding:2px 6px;cursor:pointer;";
-        heroBtn.addEventListener("click", async () => {
-          heroBtn.disabled = true;
+      actions.style.cssText = "position:absolute;top:6px;left:6px;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 12px);";
+
+      const heroBtn = document.createElement("button");
+      heroBtn.type = "button";
+      heroBtn.textContent = img.isHero ? "הסרה מסלייד הבית" : "הוספה לסלייד הבית";
+      heroBtn.style.cssText = "font-size:0.6rem;background:#fff;border:none;padding:2px 6px;cursor:pointer;";
+      heroBtn.addEventListener("click", async () => {
+        heroBtn.disabled = true;
+        try {
+          await toggleHeroImage(img.id, !img.isHero);
+          await refreshAllData();
+        } catch (err) {
+          alert("שגיאה: " + err.message);
+        }
+      });
+      actions.appendChild(heroBtn);
+
+      if (!img.isAbout) {
+        const aboutBtn = document.createElement("button");
+        aboutBtn.type = "button";
+        aboutBtn.textContent = "הפוך לתמונת הוילה";
+        aboutBtn.style.cssText = "font-size:0.6rem;background:#fff;border:none;padding:2px 6px;cursor:pointer;";
+        aboutBtn.addEventListener("click", async () => {
+          aboutBtn.disabled = true;
           try {
-            await setHeroImage(img.id);
+            await setAboutImage(img.id);
             await refreshAllData();
           } catch (err) {
             alert("שגיאה: " + err.message);
           }
         });
-        actions.appendChild(heroBtn);
+        actions.appendChild(aboutBtn);
       }
+
       const delBtn = document.createElement("button");
       delBtn.type = "button";
       delBtn.textContent = "✕";
