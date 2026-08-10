@@ -134,11 +134,20 @@ p { color: var(--color-ink-soft); }
   backdrop-filter: blur(6px);
 }
 html[dir="rtl"] .site-header {
-  justify-content: flex-start;
-  gap: clamp(1.5rem, 4vw, 3rem);
+  direction: ltr;
 }
-html[dir="rtl"] .site-header > div:last-child {
-  margin-inline-start: auto;
+@media (min-width: 721px) {
+  html[dir="rtl"] .main-nav {
+    flex: 1;
+    justify-content: center;
+    direction: rtl;
+  }
+  html[dir="rtl"] .lang-toggle {
+    position: absolute;
+    top: 50%;
+    right: var(--gap);
+    transform: translateY(-50%);
+  }
 }
 .brand {
   font-family: var(--font-display);
@@ -147,7 +156,13 @@ html[dir="rtl"] .site-header > div:last-child {
   color: #fff;
   transition: color 0.3s ease;
 }
-html[dir="rtl"] .brand { font-family: "David Libre", serif; }
+html[dir="rtl"] .site-header .brand { font-size: 0; }
+html[dir="rtl"] .site-header .brand::before {
+  content: "Villa Moseri";
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+}
 .site-header.scrolled .brand { color: var(--color-ink); }
 
 .main-nav {
@@ -281,8 +296,6 @@ html[dir="rtl"] .hero-arrow-next { right: auto; left: 1.4rem; transform: transla
 }
 .hero-content .eyebrow { color: #f1ece0; }
 .hero-content h1 { color: #fff; margin-top: 0.5rem; }
-html[dir="rtl"] .hero-content .eyebrow,
-html[dir="rtl"] .hero-content h1 { display: none; }
 .hero-content .tagline {
   color: #f2efe8;
   font-size: 1.15rem;
@@ -290,7 +303,23 @@ html[dir="rtl"] .hero-content h1 { display: none; }
   max-width: 40ch;
   font-weight: 300;
 }
+.hero-eyebrow-he, .hero-title-he, .hero-desc-he { display: none; }
+html[dir="rtl"] .hero-content > .eyebrow[data-i18n="tagline"],
+html[dir="rtl"] .hero-content > h1[data-i18n="villaName"] { display: none; }
+html[dir="rtl"] .hero-eyebrow-he,
+html[dir="rtl"] .hero-title-he { display: block; }
+html[dir="rtl"] .hero-desc-he {
+  display: block;
+  color: #f2efe8;
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-top: 1rem;
+  max-width: 46ch;
+}
 .hero-actions { margin-top: 2.2rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+html[dir="rtl"] .hero-actions .btn::before { content: "←"; }
 .scroll-cue {
   position: absolute;
   bottom: 1.6rem;
