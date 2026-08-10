@@ -308,6 +308,11 @@ html[dir="rtl"] .hero-content > .eyebrow[data-i18n="tagline"],
 html[dir="rtl"] .hero-content > h1[data-i18n="villaName"] { display: none; }
 html[dir="rtl"] .hero-eyebrow-he,
 html[dir="rtl"] .hero-title-he { display: block; }
+html[dir="rtl"] .hero-title-he {
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  line-height: 1.25;
+  max-width: 34%;
+}
 html[dir="rtl"] .hero-desc-he {
   display: block;
   color: #f2efe8;
