@@ -15,7 +15,7 @@
   --color-closed: #b96a55;
   --color-selected: #a9855f;
 
-  --font-display: "Cormorant Garamond", "Frank Ruhl Libre", serif;
+  --font-display: "Cormorant Garamond", "David Libre", serif;
   --font-body: "Jost", "Assistant", sans-serif;
 
   --container: 1240px;
@@ -66,7 +66,7 @@ h1, h2, h3 {
   margin: 0;
 }
 html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3 {
-  font-family: "Frank Ruhl Libre", serif;
+  font-family: "David Libre", serif;
 }
 
 h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 1.05; letter-spacing: 0.01em; }
@@ -133,6 +133,13 @@ p { color: var(--color-ink-soft); }
   padding: 0.85rem var(--gap);
   backdrop-filter: blur(6px);
 }
+html[dir="rtl"] .site-header {
+  justify-content: flex-start;
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+html[dir="rtl"] .site-header > div:last-child {
+  margin-inline-start: auto;
+}
 .brand {
   font-family: var(--font-display);
   font-size: 1.35rem;
@@ -140,7 +147,7 @@ p { color: var(--color-ink-soft); }
   color: #fff;
   transition: color 0.3s ease;
 }
-html[dir="rtl"] .brand { font-family: "Frank Ruhl Libre", serif; }
+html[dir="rtl"] .brand { font-family: "David Libre", serif; }
 .site-header.scrolled .brand { color: var(--color-ink); }
 
 .main-nav {
@@ -156,7 +163,7 @@ html[dir="rtl"] .brand { font-family: "Frank Ruhl Libre", serif; }
   transition: color 0.3s ease, opacity 0.2s ease;
   opacity: 0.92;
 }
-html[dir="rtl"] .main-nav a { letter-spacing: 0.02em; }
+html[dir="rtl"] .main-nav a { letter-spacing: 0.02em; font-size: 0.86rem; }
 .main-nav a:hover { opacity: 1; border-bottom: 1px solid currentColor; }
 .site-header.scrolled .main-nav a { color: var(--color-ink); }
 
@@ -241,6 +248,8 @@ html[dir="rtl"] .main-nav a { letter-spacing: 0.02em; }
 .hero-arrow:hover { background: rgba(20,18,14,0.5); border-color: #fff; }
 .hero-arrow-prev { left: 1.4rem; }
 .hero-arrow-next { right: 1.4rem; }
+html[dir="rtl"] .hero-arrow-prev { left: auto; right: 1.4rem; transform: translateY(-50%) scaleX(-1); }
+html[dir="rtl"] .hero-arrow-next { right: auto; left: 1.4rem; transform: translateY(-50%) scaleX(-1); }
 .hero-arrow[hidden], .hero-dots[hidden] { display: none; }
 .hero-dots {
   position: absolute;
@@ -274,6 +283,8 @@ html[dir="rtl"] .main-nav a { letter-spacing: 0.02em; }
 }
 .hero-content .eyebrow { color: #f1ece0; }
 .hero-content h1 { color: #fff; margin-top: 0.5rem; }
+html[dir="rtl"] .hero-content .eyebrow,
+html[dir="rtl"] .hero-content h1 { display: none; }
 .hero-content .tagline {
   color: #f2efe8;
   font-size: 1.15rem;
@@ -350,6 +361,8 @@ html[dir="rtl"] .main-nav a { letter-spacing: 0.02em; }
 .villa-fact-icon svg { width: 100%; height: 100%; }
 
 .villa-price-box { align-self: center; }
+html[dir="rtl"] .villa-price-box { display: none; }
+html[dir="rtl"] .villa-info-grid { grid-template-columns: 1fr; }
 .price-row {
   display: flex;
   align-items: baseline;
@@ -428,8 +441,8 @@ html[dir="rtl"] .price-row .price-label { letter-spacing: 0.02em; }
 html[dir="rtl"] .lightbox-close { right: auto; left: 1.6rem; }
 .lightbox-prev { left: 1.2rem; top: 50%; transform: translateY(-50%); }
 .lightbox-next { right: 1.2rem; top: 50%; transform: translateY(-50%); }
-html[dir="rtl"] .lightbox-prev { left: auto; right: 1.2rem; }
-html[dir="rtl"] .lightbox-next { right: auto; left: 1.2rem; }
+html[dir="rtl"] .lightbox-prev { left: auto; right: 1.2rem; transform: translateY(-50%) scaleX(-1); }
+html[dir="rtl"] .lightbox-next { right: auto; left: 1.2rem; transform: translateY(-50%) scaleX(-1); }
 
 /* ---------- Amenities ---------- */
 .amenities-grid {
