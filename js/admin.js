@@ -195,6 +195,17 @@
   }
 
   /* ---------------- Images panel ---------------- */
+  const TAG_OPTIONS = [
+    { value: "living", label: "סלון" },
+    { value: "kitchen", label: "מטבח" },
+    { value: "outdoor", label: "חוץ ובריכה" },
+    { value: "bedroom", label: "חדרי שינה" },
+    { value: "dining", label: "פינת אוכל" },
+    { value: "bathroom", label: "חדרי רחצה" },
+    { value: "entrance", label: "כניסה" },
+    { value: "custom", label: "כללי" }
+  ];
+
   function renderImages() {
     const grid = $("#imageGrid");
     grid.innerHTML = "";
@@ -205,10 +216,30 @@
         <img src="${img.file}" alt="">
         ${img.isHero ? '<span class="hero-badge">בסלייד הבית</span>' : ""}
         ${img.isAbout ? '<span class="about-badge">תמונת הוילה</span>' : ""}
-        <span class="tag-badge">${img.tag || ""}</span>
       `;
       const actions = document.createElement("div");
-      actions.style.cssText = "position:absolute;top:6px;left:6px;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 12px);";
+      actions.style.cssText = "position:absolute;top:6px;left:6px;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 12px);align-items:center;";
+
+      const tagSelect = document.createElement("select");
+      tagSelect.style.cssText = "font-size:0.6rem;background:#fff;border:1px solid #ccc;padding:2px 4px;cursor:pointer;border-radius:3px;";
+      TAG_OPTIONS.forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt.value;
+        option.textContent = opt.label;
+        if (img.tag === opt.value) option.selected = true;
+        tagSelect.appendChild(option);
+      });
+      tagSelect.addEventListener("change", async () => {
+        tagSelect.disabled = true;
+        try {
+          await updateImageTag(img.id, tagSelect.value);
+          await refreshAllData();
+        } catch (err) {
+          alert("שגיאה: " + err.message);
+          tagSelect.disabled = false;
+        }
+      });
+      actions.appendChild(tagSelect);
 
       const heroBtn = document.createElement("button");
       heroBtn.type = "button";

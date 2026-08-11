@@ -204,6 +204,11 @@ async function toggleHeroImage(id, isHero) {
   if (error) throw error;
 }
 
+async function updateImageTag(id, tag) {
+  const { error } = await sb.from("villa_images").update({ tag }).eq("id", id);
+  if (error) throw error;
+}
+
 // only one image can be the villa/about-section image at a time
 async function setAboutImage(id) {
   const { error: clearErr } = await sb.from("villa_images").update({ is_about: false }).eq("is_about", true);

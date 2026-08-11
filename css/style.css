@@ -498,11 +498,17 @@ html[dir="rtl"] .villa-atmosphere-title {
 }
 
 /* ---------- Gallery ---------- */
+#gallery {
+  padding: clamp(2rem, 4vw, 3.5rem) 0;
+}
+#gallery .section-head {
+  margin-bottom: clamp(1rem, 2.5vw, 1.8rem);
+}
 .gallery-nav {
   display: flex;
   justify-content: center;
-  gap: clamp(1rem, 2.5vw, 2rem);
-  margin-bottom: clamp(2rem, 4vw, 3rem);
+  gap: clamp(0.7rem, 1.8vw, 1.4rem);
+  margin-bottom: clamp(1.2rem, 2.5vw, 1.8rem);
   flex-wrap: wrap;
 }
 .gallery-nav-item {
@@ -539,7 +545,7 @@ html[dir="rtl"] .gallery-nav-item {
 .gallery-categories {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(2.5rem, 5vw, 3.5rem) clamp(2rem, 4vw, 3rem);
+  gap: clamp(1.5rem, 3vw, 2.2rem) clamp(1.2rem, 2.5vw, 2rem);
 }
 .gallery-categories.single-category {
   grid-template-columns: 1fr;
@@ -552,7 +558,7 @@ html[dir="rtl"] .gallery-nav-item {
 }
 .gallery-category-header {
   text-align: center;
-  margin-bottom: clamp(0.8rem, 1.5vw, 1.2rem);
+  margin-bottom: clamp(0.5rem, 1vw, 0.8rem);
 }
 .gallery-category-title {
   font-family: var(--font-display);
