@@ -107,50 +107,70 @@
   </div>
 </section>
 
-<section class="section availability-section section-alt" id="availability">
+<section class="section availability-section" id="availability">
   <div class="container">
-    <div class="section-head availability-head">
+    <div class="availability-head">
       <span class="eyebrow" data-i18n="availabilityTitle">Availability &amp; Pricing</span>
-      <div class="availability-head-line"></div>
-      <h2 data-i18n="availabilitySubtitle">Select a date to view nightly rates.</h2>
+      <h2 data-i18n="availabilitySubtitle">Select your dates</h2>
       <p class="availability-desc" data-i18n="availabilityDesc">Pricing varies by season, length of stay, and number of guests. Select dates to see availability and exact pricing.</p>
     </div>
 
-    <div class="availability-wrap">
-      <div class="calendar-card">
+    <div class="availability-layout">
+      <div class="calendar-panel">
         <div class="calendar-nav">
-          <button id="calPrev" aria-label="Previous">&#8249;</button>
-          <span class="month-label" id="calMonthLabel"></span>
-          <button id="calNext" aria-label="Next">&#8250;</button>
+          <button id="calPrev" aria-label="Previous month">&#8249;</button>
+          <button id="calNext" aria-label="Next month">&#8250;</button>
         </div>
         <div class="calendar-months" id="calendarMonths"></div>
         <div class="calendar-legend">
-          <div class="item"><span class="legend-swatch available"></span><span data-i18n="legendAvailable">Available</span></div>
-          <div class="item"><span class="legend-swatch closed"></span><span data-i18n="legendClosed">Not available</span></div>
-          <div class="item"><span class="legend-swatch selected"></span><span data-i18n="legendSelected">Selected</span></div>
+          <div class="legend-item"><span class="legend-swatch lg-range"></span><span data-i18n="legendRange">Selected range</span></div>
+          <div class="legend-item"><span class="legend-swatch lg-selected"></span><span data-i18n="legendSelected">Selected date</span></div>
+          <div class="legend-item"><span class="legend-swatch lg-closed"></span><span data-i18n="legendClosed">Booked</span></div>
+          <div class="legend-item"><span class="legend-price-sample">&#8362;X,XXX</span><span data-i18n="legendPrice">Price per night</span></div>
         </div>
       </div>
 
-      <div class="booking-summary">
-        <h3 data-i18n="quickFactsTitle">Your Stay</h3>
-        <div class="price-line">
-          <span data-i18n="formCheckin">Check-in</span>
-          <strong id="summaryCheckin">—</strong>
+      <div class="stay-card">
+        <h3 data-i18n="quickFactsTitle">Stay Details</h3>
+        <div class="stay-row">
+          <svg class="stay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <div class="stay-info">
+            <span class="stay-label" data-i18n="formCheckin">Check-in</span>
+            <strong class="stay-value" id="summaryCheckin">—</strong>
+          </div>
         </div>
-        <div class="price-line">
-          <span data-i18n="formCheckout">Check-out</span>
-          <strong id="summaryCheckout">—</strong>
+        <div class="stay-row">
+          <svg class="stay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <div class="stay-info">
+            <span class="stay-label" data-i18n="formCheckout">Check-out</span>
+            <strong class="stay-value" id="summaryCheckout">—</strong>
+          </div>
         </div>
-        <div class="price-line">
-          <span data-i18n="minNightsLabel">Minimum stay</span>
-          <strong id="summaryMinNights">—</strong>
+        <div class="stay-row">
+          <svg class="stay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 21v-2a5 5 0 0 1 10 0v2"/><circle cx="18" cy="8.5" r="2.5"/><path d="M22 21v-1.5a4 4 0 0 0-4-4"/></svg>
+          <div class="stay-info">
+            <span class="stay-label" data-i18n="guestsLabel">Guests</span>
+            <strong class="stay-value"><span id="guestCount">8</span> <span data-i18n="guestsUnit">guests</span></strong>
+          </div>
+          <div class="guest-controls">
+            <button type="button" id="guestMinus" aria-label="Decrease guests">&#8722;</button>
+            <button type="button" id="guestPlus" aria-label="Increase guests">+</button>
+          </div>
         </div>
-        <div class="total-line">
-          <span data-i18n="fromLabel">From</span>
-          <span id="summaryTotal">—</span>
+        <div class="stay-row stay-row-last">
+          <svg class="stay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7"/><path d="M21 21V7"/><path d="M3 14h18"/><path d="M3 14v-2a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M7 10V8a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/></svg>
+          <div class="stay-info">
+            <span class="stay-label" data-i18n="minNightsLabel">Minimum stay</span>
+            <strong class="stay-value" id="summaryMinNights">—</strong>
+          </div>
         </div>
-        <p class="hint" id="summaryHint" data-i18n="selectDatesPrompt">Select your check-in and check-out dates on the calendar above.</p>
-        <a href="#contact" class="btn btn-primary" data-i18n="availabilityCta">Check Availability &amp; Price</a>
+        <div class="stay-total" id="stayTotal">
+          <span class="stay-total-nights" id="summaryNights"></span>
+          <span class="stay-total-price" id="summaryTotal">—</span>
+        </div>
+        <p class="stay-hint" id="summaryHint" data-i18n="selectDatesPrompt">Select your check-in and check-out dates on the calendar.</p>
+        <p class="stay-disclaimer" data-i18n="priceDisclaimer">Final price will be confirmed based on the number of guests and booking details.</p>
+        <a href="#contact" class="btn stay-cta" data-i18n="availabilityCta">Check Availability &amp; Price</a>
       </div>
     </div>
 
