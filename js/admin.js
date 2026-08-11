@@ -108,14 +108,36 @@
     renderAmenitiesEditor();
   }
 
+  const amenityIconOptions = [
+    { key: "pool", label: "בריכה" },
+    { key: "chef", label: "מטבח" },
+    { key: "dining", label: "אוכל" },
+    { key: "games", label: "משחקים" },
+    { key: "garden", label: "גינה" },
+    { key: "tv", label: "טלוויזיה" },
+    { key: "wifi", label: "אינטרנט" },
+    { key: "ac", label: "מיזוג" },
+    { key: "parking", label: "חניה" }
+  ];
+
+  function normalizeAmenity(item) {
+    if (typeof item === "string") return { text: item, icon: "" };
+    return { text: item.text || "", icon: item.icon || "" };
+  }
+
   function renderAmenitiesEditor() {
     const wrap = $("#amenitiesEditor");
     wrap.innerHTML = "";
     const list = data.content[contentLang].amenities || [];
-    list.forEach((item, idx) => {
+    list.forEach((raw, idx) => {
+      const item = normalizeAmenity(raw);
       const row = document.createElement("div");
       row.className = "amenity-row";
-      row.innerHTML = `<input type="text" value="${escapeAttr(item)}" data-idx="${idx}">
+      const iconOpts = amenityIconOptions.map(
+        (o) => `<option value="${o.key}"${o.key === item.icon ? " selected" : ""}>${o.label}</option>`
+      ).join("");
+      row.innerHTML = `<select data-icon-idx="${idx}"><option value="">ללא אייקון</option>${iconOpts}</select>
+                        <input type="text" value="${escapeAttr(item.text)}" data-idx="${idx}">
                         <button type="button" data-remove="${idx}" title="הסרה">&times;</button>`;
       wrap.appendChild(row);
     });
@@ -132,7 +154,7 @@
   }
 
   $("#addAmenityBtn").addEventListener("click", () => {
-    data.content[contentLang].amenities.push("");
+    data.content[contentLang].amenities.push({ text: "", icon: "" });
     renderAmenitiesEditor();
   });
 
@@ -174,7 +196,11 @@
     c.featureGuestsDesc = $("#f-featureGuestsDesc").value;
     c.featureMinNightsTitle = $("#f-featureMinNightsTitle").value;
     c.featureMinNightsDesc = $("#f-featureMinNightsDesc").value;
-    c.amenities = $$("#amenitiesEditor input").map((i) => i.value).filter((v) => v.trim() !== "");
+    c.amenities = $$("#amenitiesEditor .amenity-row").map((row) => {
+      const text = row.querySelector("input").value;
+      const icon = row.querySelector("select").value;
+      return { text, icon };
+    }).filter((a) => a.text.trim() !== "");
     const btn = $("#saveContentBtn");
     btn.disabled = true;
     try {

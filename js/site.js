@@ -290,13 +290,30 @@
   });
 
   /* ---------------- Amenities ---------------- */
+  const amenityIcons = {
+    pool: '<svg viewBox="0 0 32 32"><path d="M4 22c2 2 4 2 6 0s4-2 6 0 4 2 6 0 4-2 6 0"/><path d="M4 26c2 2 4 2 6 0s4-2 6 0 4 2 6 0 4-2 6 0"/><path d="M8 18V8a2 2 0 0 1 4 0v10"/><path d="M20 18v-4a2 2 0 0 1 4 0v4"/><path d="M12 12h8"/></svg>',
+    chef: '<svg viewBox="0 0 32 32"><ellipse cx="16" cy="10" rx="8" ry="6"/><circle cx="10" cy="8" r="3"/><circle cx="22" cy="8" r="3"/><circle cx="16" cy="5" r="3"/><path d="M10 16v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-6"/><path d="M13 27h6"/></svg>',
+    dining: '<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="8"/><circle cx="16" cy="17" r="5.5"/><path d="M6 7v6c0 1.5 1 3 3 3h0V7"/><path d="M8 7v6"/><path d="M9 16v10"/><path d="M23 7c0 3-1 5.5-1 8h2c0-2.5-1-5-1-8z"/><path d="M23 15v11"/></svg>',
+    games: '<svg viewBox="0 0 32 32"><circle cx="10.5" cy="8.5" r="2"/><circle cx="17" cy="8.5" r="2"/><circle cx="13.75" cy="5" r="2"/><circle cx="13.75" cy="12" r="2"/><circle cx="20.5" cy="12" r="2"/><circle cx="7.25" cy="12" r="2"/><line x1="22" y1="4" x2="10" y2="28"/><path d="M6 26c0-1 1-2 2-2h4l-1 4H8a2 2 0 0 1-2-2z"/></svg>',
+    garden: '<svg viewBox="0 0 32 32"><path d="M16 28V14"/><path d="M16 18c-5 0-9-4-9-9 4 0 9 4 9 9z"/><path d="M16 14c4 0 7-3 7-7-3 0-7 3-7 7z"/><path d="M10 28h12"/></svg>',
+    tv: '<svg viewBox="0 0 32 32"><rect x="4" y="6" width="24" height="16" rx="1.5"/><path d="M10 26h12"/><path d="M16 22v4"/></svg>',
+    wifi: '<svg viewBox="0 0 32 32"><circle cx="16" cy="26" r="1.5"/><path d="M10 22a8.5 8.5 0 0 1 12 0"/><path d="M6 18c5.5-5.5 14.5-5.5 20 0"/><path d="M2 14c7.7-7.7 20.3-7.7 28 0"/></svg>',
+    ac: '<svg viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="14" rx="2"/><path d="M9 20v0"/><path d="M9 24c0 2 2 4 4 2"/><path d="M16 24v4"/><path d="M23 24c0 2-2 4-4 2"/><path d="M8 16h16"/></svg>',
+    parking: '<svg viewBox="0 0 32 32"><path d="M7 26V8a2 2 0 0 1 2-2h7l3 3v2a5 5 0 0 1 0 10h-5"/><rect x="6" y="22" width="8" height="4" rx="1"/><circle cx="8" cy="26" r="2"/><circle cx="22" cy="26" r="2"/><path d="M14 26h4"/><path d="M7 14h18l2 8v4h-3"/><path d="M10 14l2-6h8l2 6"/></svg>'
+  };
+
   function renderAmenities() {
     const grid = $("#amenitiesGrid");
     grid.innerHTML = "";
-    (t("amenities") || []).forEach((label) => {
+    (t("amenities") || []).forEach((item) => {
+      const text = typeof item === "string" ? item : item.text;
+      const iconKey = typeof item === "string" ? "" : (item.icon || "");
       const div = document.createElement("div");
       div.className = "amenity";
-      div.innerHTML = `<span class="dot"></span><span class="label">${label}</span>`;
+      const iconHtml = amenityIcons[iconKey]
+        ? `<span class="amenity-icon">${amenityIcons[iconKey]}</span>`
+        : "";
+      div.innerHTML = `${iconHtml}<span class="amenity-label">${text}</span>`;
       grid.appendChild(div);
     });
   }
