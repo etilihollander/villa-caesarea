@@ -75,26 +75,37 @@
             <div class="field"><label>מספר אורחים מקסימלי</label><input type="text" id="f-guests"></div>
             <div class="field"><label>חדרי שינה</label><input type="text" id="f-bedrooms"></div>
           </div>
+          <div class="field"><label>חדרי רחצה</label><input type="text" id="f-bathrooms"></div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>סקשן הוילה — טקסטים</h3>
+        <p class="desc" style="margin-bottom:1rem;">הכותרת הראשית, משפט ההקדמה, וטקסט האווירה מוצגים בחלק "הוילה" באתר.</p>
+        <div class="form-grid">
+          <div class="field"><label>כותרת ראשית</label><textarea id="f-introTitle" rows="3"></textarea></div>
+          <div class="field"><label>משפט הקדמה (מתחת לכותרת)</label><textarea id="f-villaSubIntro" rows="2"></textarea></div>
+          <div class="field"><label>טקסט אווירה (מתחת לתמונה ולמאפיינים)</label><textarea id="f-villaAtmosphere" rows="4"></textarea></div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>סקשן הוילה — פרטי הנכס</h3>
+        <p class="desc" style="margin-bottom:1rem;">הפריטים המוצגים ברשימת המאפיינים ליד תמונת הוילה.</p>
+        <div class="form-grid">
           <div class="two-col">
-            <div class="field"><label>חדרי רחצה</label><input type="text" id="f-bathrooms"></div>
-            <div class="field"><label>נוף (למשל "נוף לים")</label><input type="text" id="f-view"></div>
+            <div class="field"><label>מיקום מפורט</label><input type="text" id="f-villaLocationDetail"></div>
+            <div class="field"><label>חדרי שינה</label><input type="text" id="f-villaBedroomsDetail"></div>
           </div>
-        </div>
-      </div>
-
-      <div class="admin-card">
-        <h3>תיאור הוילה</h3>
-        <p class="desc" style="margin-bottom:1rem;">כותרת ההקדמה מוצגת בראש חלק "הוילה" באתר. טקסט התיאור המלא מוצג לצד התמונה שסומנה כ"תמונת הוילה" בלשונית התמונות (בעברית הטקסט מימין והתמונה משמאל, באנגלית הפוך).</p>
-        <div class="form-grid">
-          <div class="field"><label>כותרת הקדמה</label><input type="text" id="f-introTitle"></div>
-          <div class="field"><label>טקסט תיאור מלא</label><textarea id="f-introText" rows="6"></textarea></div>
-        </div>
-      </div>
-
-      <div class="admin-card">
-        <h3>כותרת ליד התמונה</h3>
-        <div class="form-grid">
-          <div class="field"><label>כותרת</label><input type="text" id="f-secondTitle"></div>
+          <div class="two-col">
+            <div class="field"><label>אורחים</label><input type="text" id="f-villaGuestsDetail"></div>
+            <div class="field"><label>חדרי רחצה</label><input type="text" id="f-villaBathroomsDetail"></div>
+          </div>
+          <div class="two-col">
+            <div class="field"><label>בריכה</label><input type="text" id="f-villaPool"></div>
+            <div class="field"><label>ברבקיו</label><input type="text" id="f-villaBbq"></div>
+          </div>
+          <div class="field"><label>נוף</label><input type="text" id="f-villaView"></div>
         </div>
       </div>
 
