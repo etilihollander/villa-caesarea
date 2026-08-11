@@ -157,6 +157,7 @@
     if (t.includes("bed") || t.includes("master")) return "bedroom";
     if (t.includes("bath")) return "bathroom";
     if (t.includes("entertainment") || t.includes("game") || t.includes("billiard")) return "living";
+    if (t.includes("entrance") || t.includes("hallway") || t.includes("foyer")) return "bathroom";
     return "general";
   }
 
