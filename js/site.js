@@ -306,7 +306,6 @@
   function updateSummary() {
     $("#summaryCheckin").textContent = selection.checkin ? fmtDateDisplay(selection.checkin) : "—";
     $("#summaryCheckout").textContent = selection.checkout ? fmtDateDisplay(selection.checkout) : "—";
-    $("#summaryMinNights").textContent = `${data.pricing.minNights} ${t("nightsUnit")}`;
 
     const hint = $("#summaryHint");
     const totalEl = $("#summaryTotal");
@@ -340,13 +339,7 @@
     totalEl.textContent = fmtMoney(total);
     stayTotalDiv.style.display = "flex";
     if (disclaimer) disclaimer.style.display = "block";
-
-    if (nights < data.pricing.minNights) {
-      hint.textContent = `${t("minNightsLabel")}: ${data.pricing.minNights} ${t("nightsUnit")}`;
-      hint.style.display = "block";
-    } else {
-      hint.style.display = "none";
-    }
+    hint.style.display = "none";
   }
 
   $("#calPrev").addEventListener("click", () => {
