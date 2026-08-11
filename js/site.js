@@ -21,6 +21,7 @@
   today.setHours(0, 0, 0, 0);
   let viewYear = today.getFullYear();
   let viewMonth = today.getMonth();
+  let guestCount = 8;
 
   const $ = (sel, root) => (root || document).querySelector(sel);
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -195,6 +196,12 @@
   function fmtMoney(n) {
     return data.pricing.currencySymbol + Math.round(n).toLocaleString(lang === "he" ? "he-IL" : "en-US");
   }
+  function fmtDateDisplay(dateKey) {
+    const d = new Date(dateKey + "T12:00:00");
+    const locale = lang === "he" ? "he-IL" : "en-US";
+    return d.toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  }
+
   function fmtMoneyCompact(n) {
     if (n >= 1000) return data.pricing.currencySymbol + Math.round(n / 1000) + "k";
     return data.pricing.currencySymbol + n;
@@ -238,7 +245,7 @@
           else if (dateKey > selection.checkin && dateKey < selection.checkout) cls += " is-in-range";
         }
 
-        const priceHtml = !isPast && !info.closed ? `<span class="price-tag">${fmtMoneyCompact(info.price)}</span>` : "";
+        const priceHtml = isPast || info.closed ? '<span class="price-tag muted">—</span>' : `<span class="price-tag">${fmtMoney(info.price)}</span>`;
         rowCells += `<td><button type="button" class="${cls}" data-date="${dateKey}" ${isPast || info.closed ? "disabled" : ""}>${dayNum}${priceHtml}</button></td>`;
       }
       rows += `<tr>${rowCells}</tr>`;
@@ -262,9 +269,6 @@
       viewMonth === 11 ? viewYear + 1 : viewYear,
       viewMonth === 11 ? 0 : viewMonth + 1
     );
-    const monthNames = t("monthNames");
-    $("#calMonthLabel").textContent = `${monthNames[viewMonth]} ${viewYear}`;
-
     $$(".day-cell[data-date]:not([disabled])", wrap).forEach((btn) => {
       btn.addEventListener("click", () => onDayClick(btn.dataset.date));
     });
@@ -300,20 +304,24 @@
   }
 
   function updateSummary() {
-    $("#summaryCheckin").textContent = selection.checkin || "—";
-    $("#summaryCheckout").textContent = selection.checkout || "—";
+    $("#summaryCheckin").textContent = selection.checkin ? fmtDateDisplay(selection.checkin) : "—";
+    $("#summaryCheckout").textContent = selection.checkout ? fmtDateDisplay(selection.checkout) : "—";
     $("#summaryMinNights").textContent = `${data.pricing.minNights} ${t("nightsUnit")}`;
 
     const hint = $("#summaryHint");
     const totalEl = $("#summaryTotal");
+    const nightsEl = $("#summaryNights");
+    const stayTotalDiv = $("#stayTotal");
+    const disclaimer = $(".stay-disclaimer");
 
     if (selection.checkin) $("#formCheckin").value = selection.checkin;
     if (selection.checkout) $("#formCheckout").value = selection.checkout;
 
     if (!selection.checkin || !selection.checkout) {
-      totalEl.textContent = "—";
+      stayTotalDiv.style.display = "none";
       hint.textContent = t("selectDatesPrompt");
       hint.style.display = "block";
+      if (disclaimer) disclaimer.style.display = "none";
       return;
     }
 
@@ -328,13 +336,16 @@
       cursor.setDate(cursor.getDate() + 1);
     }
 
-    totalEl.textContent = fmtMoney(total) + " " + t("perNight").replace("/ ", "");
+    nightsEl.textContent = `${nights} ${t("nightsUnit")}`;
+    totalEl.textContent = fmtMoney(total);
+    stayTotalDiv.style.display = "flex";
+    if (disclaimer) disclaimer.style.display = "block";
+
     if (nights < data.pricing.minNights) {
       hint.textContent = `${t("minNightsLabel")}: ${data.pricing.minNights} ${t("nightsUnit")}`;
       hint.style.display = "block";
     } else {
-      hint.textContent = `${nights} ${t("nightsUnit")}`;
-      hint.style.display = "block";
+      hint.style.display = "none";
     }
   }
 
@@ -353,6 +364,24 @@
       viewYear++;
     }
     renderCalendarMonths();
+  });
+
+  /* ---------------- Guest counter ---------------- */
+  $("#guestMinus").addEventListener("click", () => {
+    if (guestCount > 1) {
+      guestCount--;
+      $("#guestCount").textContent = guestCount;
+      const gf = $('input[name="guests"]');
+      if (gf) gf.value = guestCount;
+    }
+  });
+  $("#guestPlus").addEventListener("click", () => {
+    if (guestCount < 20) {
+      guestCount++;
+      $("#guestCount").textContent = guestCount;
+      const gf = $('input[name="guests"]');
+      if (gf) gf.value = guestCount;
+    }
   });
 
   /* ---------------- Contact form ---------------- */

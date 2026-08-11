@@ -571,90 +571,113 @@ html[dir="rtl"] .lightbox-next { right: auto; left: 1.2rem; transform: translate
 }
 
 .availability-head {
-  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto clamp(1.5rem, 3vw, 2.5rem);
 }
 .availability-head .eyebrow {
   display: block;
   margin-bottom: 0.5rem;
 }
-.availability-head-line {
-  width: 30px;
-  height: 2px;
-  background: var(--color-accent);
-  margin: 0.6rem auto 1rem;
-  opacity: 0.6;
-}
 .availability-head h2 {
   font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
   margin-top: 0;
 }
 html[dir="rtl"] .availability-head h2 {
   font-family: "David Libre", serif;
 }
 .availability-desc {
-  font-size: clamp(0.88rem, 1.1vw, 0.98rem);
+  font-size: clamp(0.85rem, 1vw, 0.94rem);
   line-height: 1.7;
   color: var(--color-ink-soft);
   font-weight: 300;
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
 }
 
-.availability-wrap {
+/* Two-column layout */
+.availability-layout {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
+  grid-template-columns: 7fr 3fr;
+  gap: clamp(1.5rem, 2.5vw, 2rem);
   align-items: start;
 }
-.calendar-card {
+html[dir="rtl"] .availability-layout {
+  direction: ltr;
+}
+html[dir="rtl"] .availability-layout > * {
+  direction: rtl;
+}
+
+/* Calendar Panel */
+.calendar-panel {
   background: #fff;
   border: 1px solid var(--color-line);
-  padding: clamp(1rem, 2.5vw, 1.8rem);
-  border-radius: 3px;
+  border-radius: 4px;
+  padding: clamp(1rem, 2vw, 1.5rem);
 }
 .calendar-nav {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
-}
-.calendar-nav .month-label {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-}
-html[dir="rtl"] .calendar-nav .month-label {
-  font-family: "David Libre", serif;
+  margin-bottom: 0.5rem;
+  direction: ltr;
 }
 .calendar-nav button {
   background: none;
   border: 1px solid var(--color-line);
-  width: 32px; height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 3px;
   cursor: pointer;
-  font-size: 1rem;
-  color: var(--color-ink);
-  transition: background 0.2s ease;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--color-ink-soft);
+  transition: background 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.calendar-nav button:hover { background: var(--color-bg-alt); }
+.calendar-nav button:hover {
+  background: var(--color-bg-alt);
+  color: var(--color-ink);
+}
+.calendar-nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.calendar-nav button:disabled:hover {
+  background: none;
+  color: var(--color-ink-soft);
+}
 
-.calendar-months { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.calendar-month table { width: 100%; border-collapse: collapse; }
+.calendar-months {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 2vw, 2rem);
+}
+.calendar-month table {
+  width: 100%;
+  border-collapse: collapse;
+}
 .calendar-month caption {
   font-family: var(--font-display);
-  font-size: 1.05rem;
-  text-align: start;
-  padding-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  padding-bottom: 0.6rem;
+  color: var(--color-ink);
 }
 html[dir="rtl"] .calendar-month caption {
   font-family: "David Libre", serif;
-  text-align: end;
 }
 .calendar-month th {
   font-size: 0.62rem;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-ink-soft);
   font-weight: 400;
-  padding-bottom: 0.3rem;
+  padding: 0 0 0.4rem;
+  text-align: center;
 }
 html[dir="rtl"] .calendar-month th {
   font-family: "Assistant", var(--font-body);
@@ -664,6 +687,8 @@ html[dir="rtl"] .calendar-month th {
   padding: 1px;
   vertical-align: middle;
 }
+
+/* Day cells */
 .day-cell {
   width: 100%;
   aspect-ratio: 1;
@@ -671,28 +696,42 @@ html[dir="rtl"] .calendar-month th {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid transparent;
+  border: none;
   background: none;
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--color-ink);
   border-radius: 50%;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   gap: 1px;
+  padding: 0;
 }
 html[dir="rtl"] .day-cell {
   font-family: "Assistant", var(--font-body);
 }
-.day-cell .price-tag { font-size: 0.48rem; color: var(--color-ink-soft); }
+.day-cell .price-tag {
+  font-size: 0.44rem;
+  color: var(--color-ink-soft);
+  line-height: 1;
+  white-space: nowrap;
+}
+.day-cell .price-tag.muted {
+  color: #ccc5b6;
+}
 .day-cell.is-empty { visibility: hidden; cursor: default; }
-.day-cell.is-past { color: #c9c2b3; cursor: not-allowed; }
-.day-cell.is-closed { color: var(--color-closed); text-decoration: line-through; cursor: not-allowed; }
-.day-cell.is-available:hover { background: var(--color-bg-alt); border-color: var(--color-accent); }
-.day-cell.is-selected { background: var(--color-selected); color: #fff; }
-.day-cell.is-in-range { background: #efe4d3; }
-.day-cell.is-today { border-color: var(--color-ink); }
+.day-cell.is-past { color: #c9c2b3; cursor: default; }
+.day-cell.is-closed { color: #c0b9aa; cursor: default; }
+.day-cell.is-available:hover { background: var(--color-bg-alt); }
+.day-cell.is-selected {
+  background: var(--color-accent);
+  color: #fff;
+}
+.day-cell.is-selected .price-tag { color: rgba(255,255,255,0.75); }
+.day-cell.is-in-range { background: #f0e8da; border-radius: 0; }
+.day-cell.is-today { font-weight: 600; }
 
+/* Calendar Legend */
 .calendar-legend {
   display: flex;
   gap: 1.2rem;
@@ -700,80 +739,175 @@ html[dir="rtl"] .day-cell {
   margin-top: 1rem;
   padding-top: 0.8rem;
   border-top: 1px solid var(--color-line);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--color-ink-soft);
 }
 html[dir="rtl"] .calendar-legend {
   font-family: "Assistant", var(--font-body);
 }
-.calendar-legend .item { display: flex; align-items: center; gap: 0.4rem; }
-.legend-swatch { width: 10px; height: 10px; border-radius: 50%; }
-.legend-swatch.available { background: var(--color-bg); border: 1px solid var(--color-accent); }
-.legend-swatch.closed { background: #f4e0da; border: 1px solid var(--color-closed); }
-.legend-swatch.selected { background: var(--color-selected); }
-
-.booking-summary {
-  background: var(--color-bg);
-  border: 1px solid var(--color-line);
-  color: var(--color-ink);
-  padding: clamp(1.4rem, 2.5vw, 2rem);
-  position: sticky;
-  top: 80px;
-  border-radius: 3px;
-}
-.booking-summary h3 {
-  color: var(--color-ink);
-  margin-bottom: 1rem;
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  text-align: center;
-}
-html[dir="rtl"] .booking-summary h3 {
-  font-family: "David Libre", serif;
-}
-.booking-summary .price-line {
+.legend-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 0.84rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid var(--color-line);
-  color: var(--color-ink-soft);
+  gap: 0.35rem;
 }
-html[dir="rtl"] .booking-summary .price-line {
-  font-family: "Assistant", var(--font-body);
-}
-.booking-summary .price-line strong { color: var(--color-ink); font-weight: 500; }
-.booking-summary .price-line .price-line-icon {
-  width: 18px;
-  height: 18px;
-  color: var(--color-accent);
+.legend-swatch {
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
 }
-.booking-summary .total-line {
+.lg-range {
+  background: #f0e8da;
+  border-radius: 3px;
+}
+.lg-selected {
+  background: var(--color-accent);
+  border-radius: 50%;
+}
+.lg-closed {
+  background: #ddd6c9;
+  border-radius: 50%;
+}
+.legend-price-sample {
+  font-size: 0.56rem;
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+/* Stay Card */
+.stay-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  padding: clamp(1.2rem, 2vw, 1.8rem);
+  position: sticky;
+  top: 80px;
+}
+.stay-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-ink);
+  margin: 0 0 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--color-line);
+}
+html[dir="rtl"] .stay-card h3 {
+  font-family: "David Libre", serif;
+}
+
+.stay-row {
   display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(221,214,201,0.35);
+}
+.stay-row-last { border-bottom: none; }
+
+.stay-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+.stay-info { flex: 1; min-width: 0; }
+.stay-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--color-ink-soft);
+  font-weight: 400;
+  margin-bottom: 0.1rem;
+}
+.stay-value {
+  display: block;
+  font-size: 0.86rem;
+  color: var(--color-ink);
+  font-weight: 500;
+}
+html[dir="rtl"] .stay-label,
+html[dir="rtl"] .stay-value {
+  font-family: "Assistant", var(--font-body);
+}
+
+/* Guest Controls */
+.guest-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.guest-controls button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: none;
+  color: var(--color-ink);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  line-height: 1;
+}
+.guest-controls button:hover {
+  background: var(--color-bg-alt);
+  border-color: var(--color-accent);
+}
+
+/* Stay Total & Hints */
+.stay-total {
+  display: none;
   justify-content: space-between;
   align-items: baseline;
   margin-top: 0.8rem;
   padding-top: 0.8rem;
   border-top: 1px solid var(--color-line);
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  color: var(--color-ink);
 }
-html[dir="rtl"] .booking-summary .total-line {
-  font-family: "David Libre", serif;
-}
-.booking-summary p.hint {
+.stay-total-nights {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
   color: var(--color-ink-soft);
-  font-size: 0.76rem;
-  margin-top: 0.6rem;
-  line-height: 1.5;
 }
-html[dir="rtl"] .booking-summary p.hint {
+html[dir="rtl"] .stay-total-nights {
   font-family: "Assistant", var(--font-body);
 }
-.booking-summary .btn {
+.stay-total-price {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+html[dir="rtl"] .stay-total-price {
+  font-family: "David Libre", serif;
+}
+
+.stay-hint {
+  font-size: 0.76rem;
+  color: var(--color-ink-soft);
+  margin: 0.6rem 0 0;
+  line-height: 1.5;
+}
+html[dir="rtl"] .stay-hint {
+  font-family: "Assistant", var(--font-body);
+}
+.stay-disclaimer {
+  font-size: 0.68rem;
+  color: var(--color-ink-soft);
+  margin: 0.3rem 0 0;
+  line-height: 1.5;
+  display: none;
+}
+html[dir="rtl"] .stay-disclaimer {
+  font-family: "Assistant", var(--font-body);
+}
+
+/* Stay CTA */
+.stay-cta {
   margin-top: 1.2rem;
   width: 100%;
   justify-content: center;
@@ -781,11 +915,13 @@ html[dir="rtl"] .booking-summary p.hint {
   border-color: var(--color-accent);
   color: #fff;
 }
-.booking-summary .btn:hover {
+.stay-cta:hover {
   background: var(--color-accent-dark);
   border-color: var(--color-accent-dark);
+  color: #fff;
 }
 
+/* Availability Features */
 .availability-features {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -823,6 +959,25 @@ html[dir="rtl"] .availability-feature strong {
 }
 html[dir="rtl"] .availability-feature span {
   font-family: "Assistant", var(--font-body);
+}
+
+/* Availability responsive */
+@media (max-width: 980px) {
+  .availability-layout {
+    grid-template-columns: 1fr;
+  }
+  html[dir="rtl"] .availability-layout {
+    direction: rtl;
+  }
+  .calendar-months {
+    grid-template-columns: 1fr;
+  }
+  .stay-card {
+    position: static;
+  }
+  .availability-features {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- Contact ---------- */
@@ -893,10 +1048,6 @@ html[dir="rtl"] .availability-feature span {
   html[dir="rtl"] .villa-image { order: 0; }
   html[dir="rtl"] .villa-details { order: 0; }
   .villa-image img { aspect-ratio: 16 / 10; }
-  .availability-wrap { grid-template-columns: 1fr; }
-  .booking-summary { position: static; }
-  .calendar-months { grid-template-columns: 1fr; }
-  .availability-features { grid-template-columns: 1fr; }
   .amenities-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 720px) {
