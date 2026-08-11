@@ -499,7 +499,14 @@ html[dir="rtl"] .villa-atmosphere-title {
 
 /* ---------- Gallery ---------- */
 #gallery {
-  padding: clamp(2rem, 4vw, 3.5rem) 0;
+  padding: clamp(1rem, 2vw, 1.5rem) 0 clamp(2rem, 4vw, 3.5rem);
+}
+.gallery-head-line {
+  width: 30px;
+  height: 2px;
+  background: var(--color-accent);
+  margin: 0.5rem auto 0.8rem;
+  opacity: 0.6;
 }
 #gallery .section-head {
   margin-bottom: clamp(1rem, 2.5vw, 1.8rem);
@@ -711,7 +718,7 @@ html[dir="rtl"] .lightbox-info {
 
 /* ---------- Availability / Calendar ---------- */
 .availability-section {
-  padding: clamp(1.5rem, 3vw, 2.5rem) 0 clamp(2.5rem, 5vw, 4rem);
+  padding: clamp(1.5rem, 3vw, 2.5rem) 0 clamp(1.2rem, 2vw, 1.8rem);
 }
 
 .availability-head {
