@@ -47,8 +47,7 @@
     });
     applyLangUI();
     renderHero();
-    renderAboutImage();
-    renderPriceRange();
+    renderVillaAtmosphere();
     renderAmenities();
     renderGallery();
     renderCalendarMonths();
@@ -120,9 +119,18 @@
   $("#heroPrev").addEventListener("click", () => goToHeroSlide(heroSlideIndex - 1));
   $("#heroNext").addEventListener("click", () => goToHeroSlide(heroSlideIndex + 1));
 
-  /* ---------------- About-section image ---------------- */
-  function renderAboutImage() {
-    const aboutImg = data.images.find((img) => img.isAbout) || data.images[1] || data.images[0];
+  /* ---------------- Villa section — atmosphere & about image ---------------- */
+  function renderVillaAtmosphere() {
+    const container = $("#villaAtmosphereText");
+    if (!container) return;
+    const text = t("villaAtmosphere") || "";
+    container.innerHTML = "";
+    text.split("\n\n").filter(function (s) { return s.trim(); }).forEach(function (para) {
+      var p = document.createElement("p");
+      p.textContent = para;
+      container.appendChild(p);
+    });
+    var aboutImg = data.images.find(function (img) { return img.isAbout; }) || data.images[1] || data.images[0];
     if (aboutImg) $("#aboutImage").src = aboutImg.file;
   }
 
@@ -190,20 +198,6 @@
   function fmtMoneyCompact(n) {
     if (n >= 1000) return data.pricing.currencySymbol + Math.round(n / 1000) + "k";
     return data.pricing.currencySymbol + n;
-  }
-
-  /* ---------------- Villa-section price range ---------------- */
-  function renderPriceRange() {
-    let min = data.pricing.basePrice;
-    let max = data.pricing.basePrice;
-    Object.values(data.pricing.days).forEach((day) => {
-      if (day.closed || !day.price) return;
-      if (day.price < min) min = day.price;
-      if (day.price > max) max = day.price;
-    });
-    const suffix = " " + t("perNight").replace("/ ", "");
-    $("#priceFrom").textContent = fmtMoney(min) + suffix;
-    $("#priceTo").textContent = fmtMoney(max) + suffix;
   }
 
   function buildMonthTable(year, month) {
