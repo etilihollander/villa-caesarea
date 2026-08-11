@@ -211,11 +211,12 @@
     grid.innerHTML = "";
     data.images.forEach((img) => {
       const tile = document.createElement("div");
-      tile.className = "image-tile";
+      tile.className = "image-tile" + (img.isHidden ? " is-hidden" : "");
       tile.innerHTML = `
         <img src="${img.file}" alt="">
         ${img.isHero ? '<span class="hero-badge">בסלייד הבית</span>' : ""}
         ${img.isAbout ? '<span class="about-badge">תמונת הוילה</span>' : ""}
+        ${img.isHidden ? '<span class="hidden-badge">מוסתרת</span>' : ""}
       `;
       const actions = document.createElement("div");
       actions.style.cssText = "position:absolute;top:6px;left:6px;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 12px);align-items:center;";
@@ -240,6 +241,22 @@
         }
       });
       actions.appendChild(tagSelect);
+
+      const hideBtn = document.createElement("button");
+      hideBtn.type = "button";
+      hideBtn.textContent = img.isHidden ? "הצגה באתר" : "הסתרה מהאתר";
+      hideBtn.style.cssText = "font-size:0.6rem;background:" + (img.isHidden ? "#e8d9c5" : "#fff") + ";border:none;padding:2px 6px;cursor:pointer;font-weight:" + (img.isHidden ? "600" : "400") + ";";
+      hideBtn.addEventListener("click", async () => {
+        hideBtn.disabled = true;
+        try {
+          await updateImageHidden(img.id, !img.isHidden);
+          await refreshAllData();
+        } catch (err) {
+          alert("שגיאה: " + err.message);
+          hideBtn.disabled = false;
+        }
+      });
+      actions.appendChild(hideBtn);
 
       const heroBtn = document.createElement("button");
       heroBtn.type = "button";

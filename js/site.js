@@ -86,7 +86,7 @@
   const heroDotsEl = $("#heroDots");
 
   function renderHero() {
-    const heroImages = data.images.filter((img) => img.isHero);
+    const heroImages = data.images.filter((img) => img.isHero && !img.isHidden);
     const slides = heroImages.length ? heroImages : [data.images[0]];
     const villaName = data.content[lang].villaName;
 
@@ -168,7 +168,7 @@
     container.innerHTML = "";
 
     const categories = {};
-    data.images.forEach((img) => {
+    data.images.filter((img) => !img.isHidden).forEach((img) => {
       const cat = tagToCategory(img.tag);
       if (!categories[cat]) categories[cat] = [];
       categories[cat].push(img);
