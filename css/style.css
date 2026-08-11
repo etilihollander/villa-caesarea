@@ -416,7 +416,7 @@ html[dir="rtl"] .villa-sub-intro {
   display: grid;
   grid-template-columns: 55fr 30fr;
   gap: clamp(1.5rem, 3vw, 2.5rem);
-  align-items: center;
+  align-items: stretch;
   max-width: 900px;
   margin: 0 auto;
 }
@@ -432,7 +432,7 @@ html[dir="rtl"] .villa-details {
 
 .villa-image img {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 100%;
   object-fit: cover;
   border-radius: 3px;
 }
@@ -470,7 +470,7 @@ html[dir="rtl"] .villa-detail-item {
 .villa-atmosphere {
   max-width: 740px;
   margin: 0 auto;
-  padding-top: clamp(1.5rem, 3vw, 2rem);
+  padding-top: clamp(0.8rem, 1.5vw, 1.2rem);
   text-align: center;
 }
 .villa-atmosphere .villa-diamond-divider {
