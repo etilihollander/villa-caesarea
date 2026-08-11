@@ -107,38 +107,13 @@
   </div>
 </section>
 
-<section class="section section-alt" id="gallery">
+<section class="section availability-section section-alt" id="availability">
   <div class="container">
-    <div class="section-head">
-      <span class="eyebrow" data-i18n="galleryTitle">Gallery</span>
-      <h2 data-i18n="gallerySubtitle">A glimpse inside the villa</h2>
-    </div>
-    <div class="gallery-grid" id="galleryGrid"></div>
-  </div>
-</section>
-
-<div class="lightbox" id="lightbox" hidden>
-  <button class="lightbox-close" id="lightboxClose">&times;</button>
-  <button class="lightbox-prev" id="lightboxPrev">&#8249;</button>
-  <img id="lightboxImg" src="" alt="">
-  <button class="lightbox-next" id="lightboxNext">&#8250;</button>
-</div>
-
-<section class="section" id="amenities">
-  <div class="container">
-    <div class="section-head">
-      <span class="eyebrow" data-i18n="amenitiesTitle">Amenities</span>
-      <h2 data-i18n="amenitiesSubtitle">Everything the villa has to offer</h2>
-    </div>
-    <div class="amenities-grid" id="amenitiesGrid"></div>
-  </div>
-</section>
-
-<section class="section section-alt" id="availability">
-  <div class="container">
-    <div class="section-head">
+    <div class="section-head availability-head">
       <span class="eyebrow" data-i18n="availabilityTitle">Availability &amp; Pricing</span>
+      <div class="availability-head-line"></div>
       <h2 data-i18n="availabilitySubtitle">Select a date to view nightly rates.</h2>
+      <p class="availability-desc" data-i18n="availabilityDesc">Pricing varies by season, length of stay, and number of guests. Select dates to see availability and exact pricing.</p>
     </div>
 
     <div class="availability-wrap">
@@ -175,9 +150,54 @@
           <span id="summaryTotal">—</span>
         </div>
         <p class="hint" id="summaryHint" data-i18n="selectDatesPrompt">Select your check-in and check-out dates on the calendar above.</p>
-        <a href="#contact" class="btn btn-primary" data-i18n="navContact">Enquire</a>
+        <a href="#contact" class="btn btn-primary" data-i18n="availabilityCta">Check Availability &amp; Price</a>
       </div>
     </div>
+
+    <div class="availability-features">
+      <div class="availability-feature">
+        <svg class="availability-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/></svg>
+        <strong data-i18n="featurePersonalTitle">Personal service</strong>
+        <span data-i18n="featurePersonalDesc">For every booking request</span>
+      </div>
+      <div class="availability-feature">
+        <svg class="availability-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 21v-2a5 5 0 0 1 10 0v2"/><circle cx="18" cy="8.5" r="2.5"/><path d="M22 21v-1.5a4 4 0 0 0-4-4"/></svg>
+        <strong data-i18n="featureGuestsTitle">Up to 20 guests</strong>
+        <span data-i18n="featureGuestsDesc">Comfortable and pampering hosting</span>
+      </div>
+      <div class="availability-feature">
+        <svg class="availability-feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7"/><path d="M21 21V7"/><path d="M3 14h18"/><path d="M3 14v-2a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/><path d="M7 10V8a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/></svg>
+        <strong data-i18n="featureMinNightsTitle">Minimum 3 nights</strong>
+        <span data-i18n="featureMinNightsDesc">For planning the perfect vacation</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="gallery">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" data-i18n="galleryTitle">Gallery</span>
+      <h2 data-i18n="gallerySubtitle">A glimpse inside the villa</h2>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <button class="lightbox-prev" id="lightboxPrev">&#8249;</button>
+  <img id="lightboxImg" src="" alt="">
+  <button class="lightbox-next" id="lightboxNext">&#8250;</button>
+</div>
+
+<section class="section" id="amenities">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" data-i18n="amenitiesTitle">Amenities</span>
+      <h2 data-i18n="amenitiesSubtitle">Everything the villa has to offer</h2>
+    </div>
+    <div class="amenities-grid" id="amenitiesGrid"></div>
   </div>
 </section>
 

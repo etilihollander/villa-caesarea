@@ -96,6 +96,15 @@
     $("#f-villaHeatedPool").value = c.villaHeatedPool || "";
     $("#f-villaOutdoorSpaces").value = c.villaOutdoorSpaces || "";
     $("#f-villaView").value = c.villaView || "";
+    $("#f-availabilitySubtitle").value = c.availabilitySubtitle || "";
+    $("#f-availabilityDesc").value = c.availabilityDesc || "";
+    $("#f-availabilityCta").value = c.availabilityCta || "";
+    $("#f-featurePersonalTitle").value = c.featurePersonalTitle || "";
+    $("#f-featurePersonalDesc").value = c.featurePersonalDesc || "";
+    $("#f-featureGuestsTitle").value = c.featureGuestsTitle || "";
+    $("#f-featureGuestsDesc").value = c.featureGuestsDesc || "";
+    $("#f-featureMinNightsTitle").value = c.featureMinNightsTitle || "";
+    $("#f-featureMinNightsDesc").value = c.featureMinNightsDesc || "";
     renderAmenitiesEditor();
   }
 
@@ -156,6 +165,15 @@
     c.villaHeatedPool = $("#f-villaHeatedPool").value;
     c.villaOutdoorSpaces = $("#f-villaOutdoorSpaces").value;
     c.villaView = $("#f-villaView").value;
+    c.availabilitySubtitle = $("#f-availabilitySubtitle").value;
+    c.availabilityDesc = $("#f-availabilityDesc").value;
+    c.availabilityCta = $("#f-availabilityCta").value;
+    c.featurePersonalTitle = $("#f-featurePersonalTitle").value;
+    c.featurePersonalDesc = $("#f-featurePersonalDesc").value;
+    c.featureGuestsTitle = $("#f-featureGuestsTitle").value;
+    c.featureGuestsDesc = $("#f-featureGuestsDesc").value;
+    c.featureMinNightsTitle = $("#f-featureMinNightsTitle").value;
+    c.featureMinNightsDesc = $("#f-featureMinNightsDesc").value;
     c.amenities = $$("#amenitiesEditor input").map((i) => i.value).filter((v) => v.trim() !== "");
     const btn = $("#saveContentBtn");
     btn.disabled = true;
