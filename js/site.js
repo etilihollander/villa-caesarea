@@ -135,49 +135,157 @@
     if (aboutImg) $("#aboutImage").src = aboutImg.file;
   }
 
-  /* ---------------- Gallery ---------------- */
+  /* ---------------- Gallery (category-based) ---------------- */
+  const GALLERY_CAT_ORDER = ["living", "kitchen", "outdoor", "bedroom", "dining", "bathroom"];
+  const GALLERY_CAT_LABELS = {
+    living:   { he: "הסלון",        en: "The Living Room" },
+    kitchen:  { he: "המטבח",        en: "The Kitchen" },
+    outdoor:  { he: "החוץ והבריכה", en: "Outdoors & Pool" },
+    bedroom:  { he: "חדרי השינה",   en: "Bedrooms" },
+    dining:   { he: "פינת אוכל",    en: "Dining Area" },
+    bathroom: { he: "חדרי רחצה",    en: "Bathrooms" },
+    general:  { he: "הוילה",        en: "The Villa" }
+  };
+
+  function tagToCategory(tag) {
+    if (!tag) return "general";
+    const t = tag.toLowerCase().trim();
+    if (t.includes("living") || t.includes("salon") || t.includes("lounge")) return "living";
+    if (t.includes("kitchen")) return "kitchen";
+    if (t.includes("dining")) return "dining";
+    if (t.includes("outdoor") || t.includes("pool") || t.includes("exterior") || t.includes("garden") || t.includes("patio")) return "outdoor";
+    if (t.includes("bed") || t.includes("master")) return "bedroom";
+    if (t.includes("bath")) return "bathroom";
+    if (t.includes("entertainment") || t.includes("game") || t.includes("billiard")) return "living";
+    return "general";
+  }
+
   function renderGallery() {
-    const grid = $("#galleryGrid");
-    grid.innerHTML = "";
-    const images = data.images;
-    images.forEach((img, i) => {
-      const fig = document.createElement("figure");
-      if (i === 0 || i === 5) fig.classList.add("wide");
-      fig.innerHTML = `<img src="${img.file}" alt="${data.content[lang].villaName}" loading="lazy">`;
-      fig.addEventListener("click", () => openLightbox(i));
-      grid.appendChild(fig);
+    const nav = $("#galleryNav");
+    const container = $("#galleryCategories");
+    nav.innerHTML = "";
+    container.innerHTML = "";
+
+    const categories = {};
+    data.images.forEach((img) => {
+      const cat = tagToCategory(img.tag);
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(img);
+    });
+
+    const orderedCats = [...GALLERY_CAT_ORDER, "general"].filter((cat) => categories[cat] && categories[cat].length > 0);
+    if (orderedCats.length === 0) return;
+
+    container.classList.toggle("single-category", orderedCats.length === 1);
+
+    const allLabel = lang === "he" ? "הכל" : "All";
+    const allBtn = document.createElement("button");
+    allBtn.className = "gallery-nav-item active";
+    allBtn.textContent = allLabel;
+    allBtn.addEventListener("click", () => {
+      $$(".gallery-nav-item", nav).forEach((b) => b.classList.remove("active"));
+      allBtn.classList.add("active");
+      $$(".gallery-category", container).forEach((el) => { el.style.display = ""; });
+    });
+    nav.appendChild(allBtn);
+
+    orderedCats.forEach((cat) => {
+      const btn = document.createElement("button");
+      btn.className = "gallery-nav-item";
+      btn.textContent = GALLERY_CAT_LABELS[cat][lang];
+      btn.addEventListener("click", () => {
+        $$(".gallery-nav-item", nav).forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const target = document.getElementById("gallery-cat-" + cat);
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      nav.appendChild(btn);
+    });
+
+    orderedCats.forEach((cat) => {
+      const images = categories[cat];
+      const section = document.createElement("div");
+      section.className = "gallery-category";
+      section.id = "gallery-cat-" + cat;
+
+      const header = document.createElement("div");
+      header.className = "gallery-category-header";
+      header.innerHTML =
+        '<h3 class="gallery-category-title">' + GALLERY_CAT_LABELS[cat][lang] + "</h3>" +
+        '<div class="gallery-category-divider"><span class="diamond"></span></div>';
+      section.appendChild(header);
+
+      const grid = document.createElement("div");
+      grid.className = "gallery-category-images";
+      images.forEach((img, i) => {
+        const fig = document.createElement("figure");
+        fig.innerHTML = '<img src="' + img.file + '" alt="' + GALLERY_CAT_LABELS[cat][lang] + '" loading="lazy">';
+        fig.addEventListener("click", () => openLightbox(cat, i));
+        grid.appendChild(fig);
+      });
+      section.appendChild(grid);
+      container.appendChild(section);
     });
   }
 
+  /* ---------------- Lightbox ---------------- */
+  let lightboxCat = null;
   let lightboxIndex = 0;
+  let lightboxImages = [];
   const lightbox = $("#lightbox");
   const lightboxImg = $("#lightboxImg");
+  const lightboxCategoryEl = $("#lightboxCategory");
+  const lightboxCounterEl = $("#lightboxCounter");
 
-  function openLightbox(i) {
+  function openLightbox(cat, i) {
+    lightboxCat = cat;
+    lightboxImages = data.images.filter((img) => tagToCategory(img.tag) === cat);
     lightboxIndex = i;
     updateLightbox();
     lightbox.hidden = false;
+    document.body.style.overflow = "hidden";
   }
+
+  function closeLightbox() {
+    lightbox.hidden = true;
+    document.body.style.overflow = "";
+  }
+
   function updateLightbox() {
-    lightboxImg.src = data.images[lightboxIndex].file;
+    if (!lightboxImages.length) return;
+    lightboxImg.src = lightboxImages[lightboxIndex].file;
+    if (lightboxCategoryEl) lightboxCategoryEl.textContent = GALLERY_CAT_LABELS[lightboxCat][lang];
+    if (lightboxCounterEl) lightboxCounterEl.textContent = (lightboxIndex + 1) + " / " + lightboxImages.length;
   }
-  $("#lightboxClose").addEventListener("click", () => (lightbox.hidden = true));
+
+  $("#lightboxClose").addEventListener("click", closeLightbox);
   lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox) lightbox.hidden = true;
+    if (e.target === lightbox) closeLightbox();
   });
   $("#lightboxPrev").addEventListener("click", () => {
-    lightboxIndex = (lightboxIndex - 1 + data.images.length) % data.images.length;
+    lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
     updateLightbox();
   });
   $("#lightboxNext").addEventListener("click", () => {
-    lightboxIndex = (lightboxIndex + 1) % data.images.length;
+    lightboxIndex = (lightboxIndex + 1) % lightboxImages.length;
     updateLightbox();
   });
   document.addEventListener("keydown", (e) => {
     if (lightbox.hidden) return;
-    if (e.key === "Escape") lightbox.hidden = true;
+    if (e.key === "Escape") closeLightbox();
     if (e.key === "ArrowRight") $("#lightboxNext").click();
     if (e.key === "ArrowLeft") $("#lightboxPrev").click();
+  });
+  let touchStartX = 0;
+  lightbox.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  lightbox.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(dx) > 50) {
+      if (dx > 0) $("#lightboxPrev").click();
+      else $("#lightboxNext").click();
+    }
   });
 
   /* ---------------- Amenities ---------------- */
