@@ -696,8 +696,11 @@ html[dir="rtl"] .lightbox-info {
 }
 
 /* ---------- Amenities ---------- */
+#amenities .container {
+  max-width: 1100px;
+}
 #amenities .section-head {
-  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  margin-bottom: clamp(2.2rem, 4vw, 3rem);
 }
 #amenities .section-head-line {
   width: 36px;
@@ -707,35 +710,34 @@ html[dir="rtl"] .lightbox-info {
   opacity: 0.55;
 }
 #amenities .section-head h2 {
-  margin-top: 1rem;
-  font-size: clamp(2rem, 3.6vw, 2.9rem);
+  margin-top: 0.9rem;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
   letter-spacing: 0.01em;
 }
 .amenities-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0;
+  gap: 0 clamp(2rem, 4vw, 3.5rem);
 }
 .amenity {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 1.1rem;
-  padding: 1.6rem 0.5rem;
-  border-bottom: 1px solid rgba(169, 133, 95, 0.18);
-  min-height: 4.5rem;
+  gap: 1rem;
+  padding: 1.8rem 0.2rem;
+  border-bottom: 1px solid rgba(169, 133, 95, 0.2);
 }
 .amenity .amenity-icon {
   flex: none;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .amenity .amenity-icon svg {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   stroke: var(--color-accent);
   fill: none;
   stroke-width: 1.3;
@@ -744,10 +746,10 @@ html[dir="rtl"] .lightbox-info {
 }
 .amenity .amenity-label {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 400;
   color: var(--color-ink);
-  line-height: 1.45;
+  line-height: 1.4;
 }
 html[dir="rtl"] .amenity .amenity-label {
   font-family: "Assistant", var(--font-body);
@@ -1202,8 +1204,8 @@ html[dir="rtl"] .stay-disclaimer {
   html[dir="rtl"] .villa-image { order: 0; }
   html[dir="rtl"] .villa-details { order: 0; }
   .villa-image img { aspect-ratio: 16 / 10; }
-  .amenities-grid { grid-template-columns: repeat(2, 1fr); }
-  .amenity { padding: 1.4rem 0.3rem; }
+  .amenities-grid { grid-template-columns: repeat(2, 1fr); gap: 0 1.5rem; }
+  .amenity { padding: 1.2rem 0.15rem; }
 }
 @media (max-width: 720px) {
   .main-nav { display: none; }

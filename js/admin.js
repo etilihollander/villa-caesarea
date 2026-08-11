@@ -117,7 +117,10 @@
     { key: "tv", label: "טלוויזיה" },
     { key: "wifi", label: "אינטרנט" },
     { key: "ac", label: "מיזוג" },
-    { key: "parking", label: "חניה" }
+    { key: "parking", label: "חניה" },
+    { key: "beach", label: "חוף ים" },
+    { key: "kids", label: "ילדים" },
+    { key: "security", label: "אבטחה" }
   ];
 
   function normalizeAmenity(item) {
