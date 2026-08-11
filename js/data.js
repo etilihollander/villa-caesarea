@@ -54,7 +54,7 @@ async function loadData() {
       en: contentRow.content_en,
       he: contentRow.content_he
     },
-    images: sortedImages.map((img) => ({ id: img.id, file: img.url, tag: img.tag, isHero: img.is_hero, isAbout: img.is_about })),
+    images: sortedImages.map((img) => ({ id: img.id, file: img.url, tag: img.tag, isHero: img.is_hero, isAbout: img.is_about, isHidden: !!img.is_hidden })),
     pricing: {
       currency: "ILS",
       currencySymbol: contentRow.currency_symbol,
@@ -206,6 +206,11 @@ async function toggleHeroImage(id, isHero) {
 
 async function updateImageTag(id, tag) {
   const { error } = await sb.from("villa_images").update({ tag }).eq("id", id);
+  if (error) throw error;
+}
+
+async function updateImageHidden(id, isHidden) {
+  const { error } = await sb.from("villa_images").update({ is_hidden: isHidden }).eq("id", id);
   if (error) throw error;
 }
 

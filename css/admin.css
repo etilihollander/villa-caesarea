@@ -208,6 +208,15 @@ body.admin-body {
 }
 .image-tile .hero-badge { top: 6px; }
 .image-tile .about-badge { top: 26px; background: var(--color-ink); }
+.image-tile.is-hidden { opacity: 0.45; }
+.image-tile .hidden-badge {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(180,50,50,0.8);
+  color: #fff;
+  font-size: 0.68rem;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+}
 .upload-drop {
   border: 1px dashed var(--color-line);
   padding: 2rem;
