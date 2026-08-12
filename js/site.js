@@ -547,11 +547,12 @@
     const checkout = fd.get("checkout") || null;
     const message = (fd.get("message") || "").trim();
 
+    const guestsNum = parseInt(guests, 10);
     let hasError = false;
     if (!name) { $('input[name="name"]', form).classList.add("cf-error"); hasError = true; }
     if (!email) { $('input[name="email"]', form).classList.add("cf-error"); hasError = true; }
     if (!phone) { $('input[name="phone"]', form).classList.add("cf-error"); hasError = true; }
-    if (!guests) { $('input[name="guests"]', form).classList.add("cf-error"); hasError = true; }
+    if (!guests || isNaN(guestsNum)) { $('input[name="guests"]', form).classList.add("cf-error"); hasError = true; }
 
     if (hasError) {
       note.textContent = t("formRequiredError") || "נא למלא את כל השדות המסומנים.";
@@ -567,7 +568,7 @@
         name,
         email,
         phone,
-        guests: Number(guests),
+        guests: guestsNum,
         checkin: checkin || null,
         checkout: checkout || null,
         message: message || null

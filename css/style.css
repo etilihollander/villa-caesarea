@@ -696,6 +696,9 @@ html[dir="rtl"] .lightbox-info {
 }
 
 /* ---------- Amenities ---------- */
+#amenities {
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
 #amenities .section-head {
   margin-bottom: clamp(1.8rem, 3.5vw, 2.8rem);
 }
@@ -1136,7 +1139,7 @@ html[dir="rtl"] .stay-disclaimer {
 /* ---------- Contact ---------- */
 .contact-section {
   background: var(--color-bg);
-  padding: clamp(3rem, 6vw, 5rem) 0 clamp(2.5rem, 5vw, 4rem);
+  padding: clamp(1rem, 2vw, 1.5rem) 0 clamp(2.5rem, 5vw, 4rem);
 }
 .contact-head {
   text-align: center;
