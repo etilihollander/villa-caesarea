@@ -1134,12 +1134,271 @@ html[dir="rtl"] .stay-disclaimer {
 }
 
 /* ---------- Contact ---------- */
-.contact-grid {
+.contact-section {
+  background: var(--color-bg);
+  padding: clamp(3rem, 6vw, 5rem) 0 clamp(2.5rem, 5vw, 4rem);
+}
+.contact-head {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto clamp(1.8rem, 3.5vw, 2.8rem);
+}
+.contact-head .eyebrow {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.contact-head-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.5rem auto 0.8rem;
+  max-width: 120px;
+}
+.contact-head-divider::before,
+.contact-head-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.4;
+}
+.contact-head-divider .diamond {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.contact-title {
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  margin-top: 0;
+}
+html[dir="rtl"] .contact-title {
+  font-family: "David Libre", serif;
+}
+.contact-subtitle {
+  font-size: clamp(0.88rem, 1.1vw, 0.98rem);
+  line-height: 1.8;
+  color: var(--color-ink-soft);
+  margin-top: 0.6rem;
+  font-weight: 300;
+}
+
+/* Form */
+.contact-form {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1.1rem;
+}
+.cf-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(2rem, 5vw, 4rem);
+  gap: 1.1rem;
 }
-.contact-form { display: grid; gap: 1.1rem; }
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.cf-field-full {
+  grid-column: 1 / -1;
+}
+.cf-field label {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  font-weight: 400;
+}
+html[dir="rtl"] .cf-field label {
+  font-family: "Assistant", var(--font-body);
+  letter-spacing: 0.02em;
+}
+.cf-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.cf-input-wrap input,
+.cf-input-wrap textarea {
+  width: 100%;
+  border: 1px solid #ddd6c9;
+  border-radius: 4px;
+  background: #fefdfb;
+  padding: 0.75rem 0.9rem;
+  padding-inline-end: 2.6rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--color-ink);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+html[dir="rtl"] .cf-input-wrap input,
+html[dir="rtl"] .cf-input-wrap textarea {
+  font-family: "Assistant", var(--font-body);
+}
+.cf-input-wrap input::placeholder,
+.cf-input-wrap textarea::placeholder {
+  color: #c5bfb3;
+  font-weight: 300;
+}
+.cf-input-wrap input:focus,
+.cf-input-wrap textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(169, 133, 95, 0.1);
+}
+.cf-input-wrap input.cf-error,
+.cf-input-wrap textarea.cf-error {
+  border-color: #c0675a;
+}
+.cf-textarea-wrap {
+  align-items: flex-start;
+}
+.cf-textarea-wrap textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+.cf-icon {
+  position: absolute;
+  inset-inline-end: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--color-accent);
+  opacity: 0.65;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.cf-icon-textarea {
+  top: 0.85rem;
+  transform: none;
+}
+
+/* Submit */
+.contact-submit {
+  width: 100%;
+  justify-content: center;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 1rem 2rem;
+  min-height: 56px;
+  letter-spacing: 0.12em;
+  margin-top: 0.4rem;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.15s ease;
+}
+html[dir="rtl"] .contact-submit {
+  font-family: "Assistant", var(--font-body);
+  letter-spacing: 0.04em;
+  font-size: 0.95rem;
+}
+.contact-submit:hover {
+  background: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
+  color: #fff;
+}
+.contact-submit:active {
+  transform: scale(0.99);
+}
+.contact-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.contact-submit:disabled:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.form-note {
+  padding: 0.9rem 1rem;
+  background: var(--color-bg-alt);
+  border-inline-start: 3px solid var(--color-accent);
+  font-size: 0.86rem;
+  display: none;
+  color: var(--color-ink);
+  border-radius: 3px;
+  text-align: center;
+}
+html[dir="rtl"] .form-note {
+  font-family: "Assistant", var(--font-body);
+}
+.form-note.visible { display: block; }
+.form-note.error {
+  border-inline-start-color: #c0675a;
+  background: #faf5f4;
+}
+
+/* Benefits */
+.contact-benefits {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-top: clamp(1.8rem, 3vw, 2.5rem);
+}
+.contact-benefits-line {
+  width: 100%;
+  height: 1px;
+  background: var(--color-line);
+  margin-bottom: clamp(1.2rem, 2vw, 1.8rem);
+}
+.contact-benefits-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+.contact-benefit {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-width: 0;
+}
+html[dir="rtl"] .contact-benefit {
+  flex-direction: row;
+}
+.cb-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+  margin-top: 0.1rem;
+}
+.cb-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.cb-text strong {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  letter-spacing: 0.01em;
+}
+.cb-text span {
+  font-size: 0.72rem;
+  color: var(--color-ink-soft);
+  font-weight: 300;
+  line-height: 1.45;
+}
+html[dir="rtl"] .cb-text strong,
+html[dir="rtl"] .cb-text span {
+  font-family: "Assistant", var(--font-body);
+}
+.contact-benefit-sep {
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-line);
+  flex-shrink: 0;
+}
+
+/* Admin form fields (keep original .field for admin) */
 .field { display: flex; flex-direction: column; gap: 0.4rem; }
 .field label {
   font-size: 0.72rem;
@@ -1161,18 +1420,6 @@ html[dir="rtl"] .stay-disclaimer {
   border-color: var(--color-accent);
 }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
-.form-note {
-  padding: 0.9rem 1rem;
-  background: var(--color-bg-alt);
-  border-inline-start: 3px solid var(--color-accent);
-  font-size: 0.86rem;
-  display: none;
-  color: var(--color-ink);
-}
-.form-note.visible { display: block; }
-
-.contact-side { display: flex; flex-direction: column; justify-content: center; gap: 1.4rem; }
-.contact-side img { border-radius: var(--radius); }
 
 /* ---------- Footer ---------- */
 .site-footer {
@@ -1195,7 +1442,6 @@ html[dir="rtl"] .stay-disclaimer {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 980px) {
-  .contact-grid { grid-template-columns: 1fr; }
   .gallery-categories { grid-template-columns: 1fr; }
   .villa-showcase { grid-template-columns: 1fr; max-width: 100%; }
   html[dir="rtl"] .villa-showcase { grid-template-columns: 1fr; }
@@ -1234,6 +1480,20 @@ html[dir="rtl"] .stay-disclaimer {
   .gallery-nav-item { white-space: nowrap; flex-shrink: 0; }
   .amenities-grid { grid-template-columns: repeat(2, 1fr); }
   .field-row { grid-template-columns: 1fr; }
+  .cf-row { grid-template-columns: 1fr; }
+  .contact-benefits-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .contact-benefit-sep {
+    width: 100%;
+    height: 1px;
+    align-self: auto;
+  }
+  .contact-benefit {
+    padding: 0.3rem 0;
+  }
 }
 @media (max-width: 420px) {
   .amenities-grid { grid-template-columns: 1fr; }

@@ -46,6 +46,11 @@
       const val = t(key);
       if (typeof val === "string") el.textContent = val;
     });
+    $$("[data-i18n-placeholder]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-placeholder");
+      const val = t(key);
+      if (typeof val === "string") el.placeholder = val;
+    });
     applyLangUI();
     renderHero();
     renderVillaAtmosphere();
@@ -444,6 +449,8 @@
 
     if (selection.checkin) $("#formCheckin").value = selection.checkin;
     if (selection.checkout) $("#formCheckout").value = selection.checkout;
+    const guestsField = $("#formGuests");
+    if (guestsField && !guestsField.value) guestsField.value = guestCount;
 
     if (!selection.checkin || !selection.checkout) {
       stayTotalDiv.style.display = "none";
@@ -506,37 +513,79 @@
     }
   });
 
-  /* ---------------- Contact form ---------------- */
+  /* ---------------- Contact form — pre-fill from availability ---------------- */
+  function prefillContactFromAvailability() {
+    if (selection.checkin) $("#formCheckin").value = selection.checkin;
+    if (selection.checkout) $("#formCheckout").value = selection.checkout;
+    const gf = $("#formGuests");
+    if (gf && guestCount) gf.value = guestCount;
+  }
+
+  $$('a[href="#contact"]').forEach((link) => {
+    link.addEventListener("click", () => {
+      setTimeout(prefillContactFromAvailability, 100);
+    });
+  });
+
+  /* ---------------- Contact form — submit to Supabase ---------------- */
   const form = $("#contactForm");
-  form.addEventListener("submit", (e) => {
+  const submitBtn = $("#contactSubmitBtn");
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const fd = new FormData(form);
-    const name = fd.get("name");
-    const email = fd.get("email");
-    const phone = fd.get("phone");
-    const guests = fd.get("guests");
-    const checkin = fd.get("checkin");
-    const checkout = fd.get("checkout");
-    const message = fd.get("message");
-
-    const subject = encodeURIComponent(`${data.content[lang].villaName} — Enquiry from ${name}`);
-    const bodyLines = [
-      `Name: ${name}`,
-      `Email: ${email}`,
-      phone ? `Phone: ${phone}` : null,
-      guests ? `Guests: ${guests}` : null,
-      checkin ? `Check-in: ${checkin}` : null,
-      checkout ? `Check-out: ${checkout}` : null,
-      "",
-      message || ""
-    ].filter(Boolean);
-    const body = encodeURIComponent(bodyLines.join("\n"));
-
-    window.location.href = `mailto:${data.contactEmail}?subject=${subject}&body=${body}`;
-
     const note = $("#formNote");
-    note.textContent = t("formSuccess");
-    note.classList.add("visible");
+    note.classList.remove("visible", "error");
+
+    $$(".cf-error", form).forEach((el) => el.classList.remove("cf-error"));
+
+    const fd = new FormData(form);
+    const name = (fd.get("name") || "").trim();
+    const email = (fd.get("email") || "").trim();
+    const phone = (fd.get("phone") || "").trim();
+    const guests = fd.get("guests");
+    const checkin = fd.get("checkin") || null;
+    const checkout = fd.get("checkout") || null;
+    const message = (fd.get("message") || "").trim();
+
+    let hasError = false;
+    if (!name) { $('input[name="name"]', form).classList.add("cf-error"); hasError = true; }
+    if (!email) { $('input[name="email"]', form).classList.add("cf-error"); hasError = true; }
+    if (!phone) { $('input[name="phone"]', form).classList.add("cf-error"); hasError = true; }
+    if (!guests) { $('input[name="guests"]', form).classList.add("cf-error"); hasError = true; }
+
+    if (hasError) {
+      note.textContent = t("formRequiredError") || "נא למלא את כל השדות המסומנים.";
+      note.classList.add("visible", "error");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = t("formSending") || "שולח...";
+
+    try {
+      const { error } = await sb.from("enquiries").insert({
+        name,
+        email,
+        phone,
+        guests: Number(guests),
+        checkin: checkin || null,
+        checkout: checkout || null,
+        message: message || null
+      });
+      if (error) throw error;
+
+      note.textContent = t("formSuccess") || "הבקשה נשלחה בהצלחה! נחזור אליכם בהקדם.";
+      note.classList.add("visible");
+      note.classList.remove("error");
+      form.reset();
+    } catch (err) {
+      console.error("Enquiry submit error:", err);
+      note.textContent = t("formError") || "שגיאה בשליחה. אנא נסו שוב.";
+      note.classList.add("visible", "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = t("formSubmit") || "שליחת בקשה ←";
+    }
   });
 
   /* ---------------- Init ---------------- */

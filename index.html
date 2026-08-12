@@ -197,55 +197,104 @@
   </div>
 </section>
 
-<section class="section" id="contact">
-  <div class="container contact-grid">
-    <div>
-      <span class="eyebrow" data-i18n="navContact">Enquire</span>
-      <h2 data-i18n="contactTitle">Enquire About Your Stay</h2>
-      <p data-i18n="contactSubtitle" style="margin-top:1rem; max-width:46ch;">Tell us your preferred dates...</p>
+<section class="section contact-section" id="contact">
+  <div class="container">
+    <div class="contact-head">
+      <span class="eyebrow" data-i18n="contactEyebrow">צור קשר</span>
+      <div class="contact-head-divider"><span class="diamond"></span></div>
+      <h2 class="contact-title" data-i18n="contactTitle">מתכננים חופשה בקיסריה?</h2>
+      <p class="contact-subtitle" data-i18n="contactSubtitle">ספרו לנו מתי תרצו להגיע וכמה אורחים תהיו, ונחזור אליכם עם זמינות ופרטי האירוח.</p>
+    </div>
 
-      <form class="contact-form" id="contactForm" style="margin-top:2rem;">
-        <div class="field-row">
-          <div class="field">
-            <label data-i18n="formName">Full name</label>
-            <input type="text" name="name" required>
-          </div>
-          <div class="field">
-            <label data-i18n="formEmail">Email</label>
-            <input type="email" name="email" required>
+    <form class="contact-form" id="contactForm" novalidate>
+      <div class="cf-row">
+        <div class="cf-field">
+          <label data-i18n="formName">שם מלא</label>
+          <div class="cf-input-wrap">
+            <input type="text" name="name" required data-i18n-placeholder="formNamePh" placeholder="הקלידו שם מלא">
+            <svg class="cf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>
           </div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label data-i18n="formPhone">Phone</label>
-            <input type="tel" name="phone">
-          </div>
-          <div class="field">
-            <label data-i18n="formGuests">Number of guests</label>
-            <input type="number" name="guests" min="1" max="20">
+        <div class="cf-field">
+          <label data-i18n="formPhone">טלפון</label>
+          <div class="cf-input-wrap">
+            <input type="tel" name="phone" required data-i18n-placeholder="formPhonePh" placeholder="הקלידו מספר טלפון">
+            <svg class="cf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           </div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label data-i18n="formCheckin">Check-in</label>
-            <input type="date" name="checkin" id="formCheckin">
-          </div>
-          <div class="field">
-            <label data-i18n="formCheckout">Check-out</label>
-            <input type="date" name="checkout" id="formCheckout">
+      </div>
+      <div class="cf-row">
+        <div class="cf-field">
+          <label data-i18n="formEmail">אימייל</label>
+          <div class="cf-input-wrap">
+            <input type="email" name="email" required data-i18n-placeholder="formEmailPh" placeholder="הקלידו כתובת אימייל">
+            <svg class="cf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>
           </div>
         </div>
-        <div class="field">
-          <label data-i18n="formMessage">Message</label>
-          <textarea name="message" rows="4"></textarea>
+        <div class="cf-field">
+          <label data-i18n="formGuests">מספר אורחים</label>
+          <div class="cf-input-wrap">
+            <input type="number" name="guests" min="1" max="20" required id="formGuests" data-i18n-placeholder="formGuestsPh" placeholder="הקלידו מספר אורחים">
+            <svg class="cf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 21v-2a5 5 0 0 1 10 0v2"/><circle cx="18" cy="8.5" r="2.5"/><path d="M22 21v-1.5a4 4 0 0 0-4-4"/></svg>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary" data-i18n="formSubmit">Send Enquiry</button>
-        <div class="form-note" id="formNote" data-i18n="formSuccess"></div>
-      </form>
+      </div>
+      <div class="cf-row">
+        <div class="cf-field">
+          <label data-i18n="formCheckin">תאריך כניסה</label>
+          <div class="cf-input-wrap">
+            <input type="date" name="checkin" id="formCheckin" data-i18n-placeholder="formDatePh" placeholder="בחרו תאריך">
+            <svg class="cf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+        </div>
+        <div class="cf-field">
+          <label data-i18n="formCheckout">תאריך יציאה</label>
+          <div class="cf-input-wrap">
+            <input type="date" name="checkout" id="formCheckout" data-i18n-placeholder="formDatePh" placeholder="בחרו תאריך">
+            <svg class="cf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="cf-field cf-field-full">
+        <label data-i18n="formMessage">הודעה</label>
+        <div class="cf-input-wrap cf-textarea-wrap">
+          <textarea name="message" rows="3" data-i18n-placeholder="formMessagePh" placeholder="כתבו לנו כל שאלה או בקשה מיוחדת"></textarea>
+          <svg class="cf-icon cf-icon-textarea" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z"/></svg>
+        </div>
+      </div>
+      <button type="submit" class="btn contact-submit" id="contactSubmitBtn" data-i18n="formSubmit">שליחת בקשה ←</button>
+      <div class="form-note" id="formNote"></div>
+    </form>
+
+    <div class="contact-benefits">
+      <div class="contact-benefits-line"></div>
+      <div class="contact-benefits-row">
+        <div class="contact-benefit">
+          <svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h0"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div class="cb-text">
+            <strong data-i18n="benefitPersonalTitle">מענה אישי</strong>
+            <span data-i18n="benefitPersonalDesc">זמינים עבורכם בכל שלב</span>
+          </div>
+        </div>
+        <div class="contact-benefit-sep"></div>
+        <div class="contact-benefit">
+          <svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 21v-2a5 5 0 0 1 10 0v2"/><circle cx="18" cy="8.5" r="2.5"/><path d="M22 21v-1.5a4 4 0 0 0-4-4"/></svg>
+          <div class="cb-text">
+            <strong data-i18n="benefitGuestsTitle">עד 20 אורחים</strong>
+            <span data-i18n="benefitGuestsDesc">מתאים לאירועים וחופשות משפחתיות</span>
+          </div>
+        </div>
+        <div class="contact-benefit-sep"></div>
+        <div class="contact-benefit">
+          <svg class="cb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          <div class="cb-text">
+            <strong data-i18n="benefitPrivacyTitle">פרטיות מלאה</strong>
+            <span data-i18n="benefitPrivacyDesc">הפרטים שלכם נשמרים בבטחה</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="contact-side">
-      <img src="images/villa-12.jpg" alt="Villa bedroom">
-    </div>
+
   </div>
 </section>
 

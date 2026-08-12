@@ -407,6 +407,112 @@ body.admin-body {
   margin-bottom: 1.6rem;
 }
 
+/* Enquiries panel */
+.enquiries-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+.enquiries-stats {
+  font-size: 0.88rem;
+  color: var(--color-ink-soft);
+}
+.enquiries-loading, .enquiries-empty {
+  text-align: center;
+  color: var(--color-ink-soft);
+  padding: 2rem 0;
+}
+.enquiry-card {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 0.8rem;
+  border-radius: 3px;
+  transition: border-color 0.2s ease;
+}
+.enquiry-card.is-unread {
+  border-inline-start: 3px solid var(--color-accent);
+}
+.enquiry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.enquiry-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.enquiry-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+.enquiry-date {
+  font-size: 0.72rem;
+  color: var(--color-ink-soft);
+}
+.enquiry-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.5rem;
+}
+.enquiry-detail strong {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+.enquiry-message {
+  font-size: 0.86rem;
+  color: var(--color-ink);
+  background: var(--color-bg-alt);
+  padding: 0.7rem 0.9rem;
+  border-radius: 3px;
+  margin: 0.5rem 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.enquiry-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  flex-wrap: wrap;
+}
+.enquiry-reply-btn {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 0.5rem 1rem;
+}
+.enquiry-reply-btn:hover {
+  background: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
+  color: #fff;
+}
+.enquiry-read-btn {
+  font-size: 0.72rem;
+  padding: 0.5rem 1rem;
+}
+.enquiry-delete-btn {
+  font-size: 0.72rem;
+  padding: 0.5rem 1rem;
+  color: var(--color-closed);
+  border-color: var(--color-closed);
+}
+.enquiry-delete-btn:hover {
+  background: var(--color-closed);
+  color: #fff;
+}
+
 @media (max-width: 860px) {
   .admin-shell { flex-direction: column; }
   .admin-sidebar { width: 100%; flex-direction: row; align-items: center; flex-wrap: wrap; }

@@ -45,6 +45,7 @@
       <button data-panel="images">תמונות</button>
       <button data-panel="calendar">יומן ומחירים</button>
       <button data-panel="finance">הוצאות והכנסות</button>
+      <button data-panel="enquiries">פניות</button>
       <button data-panel="settings">הגדרות</button>
     </nav>
     <a href="index.html" target="_blank" class="view-site">↗ צפייה באתר</a>
@@ -256,6 +257,21 @@
         </div>
       </div>
 
+    </section>
+
+    <!-- ---- ENQUIRIES PANEL ---- -->
+    <section class="admin-panel" id="panel-enquiries">
+      <h2>פניות מהאתר</h2>
+      <p class="desc">כל הפניות שהתקבלו דרך טופס צור קשר באתר. לחצו על פנייה כדי לפתוח אותה ולהשיב במייל.</p>
+
+      <div class="enquiries-toolbar">
+        <div class="enquiries-stats" id="enquiriesStats"></div>
+        <button class="btn" id="refreshEnquiriesBtn">רענון</button>
+      </div>
+
+      <div class="enquiries-list" id="enquiriesList">
+        <p class="enquiries-loading">טוען פניות...</p>
+      </div>
     </section>
 
     <!-- ---- SETTINGS PANEL ---- -->

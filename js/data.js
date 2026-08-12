@@ -288,6 +288,24 @@ async function loadActualBookingStats(basePrice) {
   return { byYear, byMonth };
 }
 
+/* ---------------- Enquiries (admin only) ---------------- */
+
+async function loadEnquiries() {
+  const { data, error } = await sb.from("enquiries").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+async function markEnquiryRead(id, isRead) {
+  const { error } = await sb.from("enquiries").update({ is_read: isRead }).eq("id", id);
+  if (error) throw error;
+}
+
+async function deleteEnquiry(id) {
+  const { error } = await sb.from("enquiries").delete().eq("id", id);
+  if (error) throw error;
+}
+
 /* ---------------- Auth (admin login) ---------------- */
 
 async function adminSignIn(email, password) {
@@ -318,6 +336,7 @@ function subscribeToVillaChanges(onChange) {
     .on("postgres_changes", { event: "*", schema: "public", table: "site_content" }, onChange)
     .on("postgres_changes", { event: "*", schema: "public", table: "calendar_days" }, onChange)
     .on("postgres_changes", { event: "*", schema: "public", table: "villa_images" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "enquiries" }, onChange)
     .subscribe();
   return () => sb.removeChannel(channel);
 }
