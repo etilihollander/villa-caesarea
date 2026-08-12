@@ -745,6 +745,103 @@
     }
   });
 
+  /* ---------------- Enquiries panel ---------------- */
+  let enquiries = [];
+
+  function fmtEnqDate(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleDateString("he-IL", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  function fmtEnqTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString("he-IL", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  async function renderEnquiries() {
+    const list = $("#enquiriesList");
+    const stats = $("#enquiriesStats");
+    const unread = enquiries.filter((e) => !e.is_read).length;
+    stats.textContent = `${enquiries.length} פניות סה״כ · ${unread} חדשות`;
+
+    if (!enquiries.length) {
+      list.innerHTML = '<p class="enquiries-empty">אין פניות עדיין.</p>';
+      return;
+    }
+
+    list.innerHTML = enquiries.map((enq) => `
+      <div class="enquiry-card${enq.is_read ? "" : " is-unread"}" data-id="${enq.id}">
+        <div class="enquiry-header">
+          <div class="enquiry-name">${enq.is_read ? "" : '<span class="enquiry-dot"></span>'}${escapeHtml(enq.name)}</div>
+          <div class="enquiry-date">${fmtEnqTime(enq.created_at)}</div>
+        </div>
+        <div class="enquiry-details">
+          <span class="enquiry-detail"><strong>טלפון:</strong> ${escapeHtml(enq.phone)}</span>
+          <span class="enquiry-detail"><strong>אימייל:</strong> ${escapeHtml(enq.email)}</span>
+          <span class="enquiry-detail"><strong>אורחים:</strong> ${enq.guests}</span>
+          ${enq.checkin ? `<span class="enquiry-detail"><strong>כניסה:</strong> ${fmtEnqDate(enq.checkin)}</span>` : ""}
+          ${enq.checkout ? `<span class="enquiry-detail"><strong>יציאה:</strong> ${fmtEnqDate(enq.checkout)}</span>` : ""}
+        </div>
+        ${enq.message ? `<div class="enquiry-message">${escapeHtml(enq.message)}</div>` : ""}
+        <div class="enquiry-actions">
+          <a href="mailto:${encodeURIComponent(enq.email)}?subject=${encodeURIComponent("וילה קיסריה — תשובה לפנייתכם")}" class="btn enquiry-reply-btn">↩ השב במייל</a>
+          <button type="button" class="btn enquiry-read-btn" data-id="${enq.id}" data-read="${enq.is_read}">${enq.is_read ? "סמן כלא נקרא" : "סמן כנקרא"}</button>
+          <button type="button" class="btn enquiry-delete-btn" data-id="${enq.id}">מחיקה</button>
+        </div>
+      </div>
+    `).join("");
+
+    $$(".enquiry-read-btn", list).forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        try {
+          const id = Number(btn.dataset.id);
+          const currentlyRead = btn.dataset.read === "true";
+          await markEnquiryRead(id, !currentlyRead);
+          enquiries = await loadEnquiries();
+          renderEnquiries();
+        } catch (err) {
+          alert("שגיאה: " + err.message);
+          btn.disabled = false;
+        }
+      });
+    });
+
+    $$(".enquiry-delete-btn", list).forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("למחוק את הפנייה?")) return;
+        btn.disabled = true;
+        try {
+          await deleteEnquiry(Number(btn.dataset.id));
+          enquiries = await loadEnquiries();
+          renderEnquiries();
+        } catch (err) {
+          alert("שגיאה: " + err.message);
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement("div");
+    div.textContent = s || "";
+    return div.innerHTML;
+  }
+
+  async function loadEnquiriesPanel() {
+    try {
+      enquiries = await loadEnquiries();
+      renderEnquiries();
+    } catch (err) {
+      console.error(err);
+      $("#enquiriesList").innerHTML = '<p class="enquiries-empty">שגיאה בטעינת פניות.</p>';
+    }
+  }
+
+  $("#refreshEnquiriesBtn").addEventListener("click", loadEnquiriesPanel);
+
   /* ---------------- Settings panel ---------------- */
   async function loadSettingsForm() {
     $("#f-basePrice").value = data.pricing.basePrice;
@@ -808,6 +905,7 @@
     updateRangeSummary();
     finance = await loadFinanceSettings();
     await loadFinancePanel();
+    await loadEnquiriesPanel();
     await loadSettingsForm();
 
     if (!unsubscribe) {
