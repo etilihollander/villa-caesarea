@@ -1501,3 +1501,198 @@ html[dir="rtl"] .cb-text span {
 @media (max-width: 420px) {
   .amenities-grid { grid-template-columns: 1fr; }
 }
+
+/* ==================================================================
+   Accessibility (Israeli Standard 5568 / WCAG 2.1 AA)
+   ================================================================== */
+
+/* ---- Skip link ---- */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  inset-inline-start: 1rem;
+  z-index: 3000;
+  background: var(--color-accent-dark);
+  color: #fff;
+  padding: 0.7rem 1.2rem;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ---- Visible focus for keyboard users ---- */
+:focus-visible {
+  outline: 2px solid var(--color-accent-dark);
+  outline-offset: 2px;
+}
+.hero :focus-visible,
+.lightbox :focus-visible {
+  outline-color: #fff;
+}
+
+/* ---- Accessibility widget ---- */
+.a11y-widget {
+  position: fixed;
+  bottom: 1.2rem;
+  inset-inline-end: 1.2rem;
+  z-index: 2500;
+  font-family: var(--font-body);
+}
+html[dir="rtl"] .a11y-widget { font-family: "Assistant", sans-serif; }
+.a11y-toggle {
+  width: 48px;
+  height: 48px;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  background: var(--color-accent-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+.a11y-toggle:hover { transform: scale(1.06); }
+.a11y-toggle svg { width: 26px; height: 26px; }
+.a11y-panel {
+  position: absolute;
+  bottom: 58px;
+  inset-inline-end: 0;
+  min-width: 210px;
+  background: #fff;
+  border: 1px solid #ddd6c9;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.a11y-panel-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  padding: 0.45rem 0.7rem 0.55rem;
+  border-bottom: 1px solid #eee7db;
+  margin-bottom: 4px;
+}
+.a11y-panel button,
+.a11y-panel a {
+  text-align: start;
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  padding: 0.5rem 0.7rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  background: none;
+  font-family: inherit;
+  display: block;
+  width: 100%;
+}
+.a11y-panel button:hover,
+.a11y-panel a:hover {
+  background: var(--color-bg);
+}
+.a11y-panel button[aria-pressed="true"] {
+  background: var(--color-accent);
+  color: #fff;
+}
+.a11y-panel a {
+  border-top: 1px solid #eee7db;
+  margin-top: 4px;
+  text-decoration: underline;
+  font-size: 0.84rem;
+}
+.footer-a11y-link {
+  color: inherit;
+  text-decoration: underline;
+  font-size: 0.85rem;
+}
+
+/* ---- Mode: large text ---- */
+html.a11y-large-text { font-size: 120%; }
+
+/* ---- Mode: high contrast ---- */
+html.a11y-contrast body,
+html.a11y-contrast .section,
+html.a11y-contrast .contact-section,
+html.a11y-contrast .site-footer,
+html.a11y-contrast .stay-card,
+html.a11y-contrast .calendar-panel,
+html.a11y-contrast .a11y-panel {
+  background: #000 !important;
+  color: #fff !important;
+}
+html.a11y-contrast h1,
+html.a11y-contrast h2,
+html.a11y-contrast h3,
+html.a11y-contrast p,
+html.a11y-contrast span,
+html.a11y-contrast label,
+html.a11y-contrast strong,
+html.a11y-contrast .eyebrow,
+html.a11y-contrast .a11y-panel button,
+html.a11y-contrast .a11y-panel a,
+html.a11y-contrast .a11y-panel-title,
+html.a11y-contrast .amenity-label {
+  color: #fff !important;
+}
+html.a11y-contrast a:not(.btn) { color: #ffef7d !important; }
+html.a11y-contrast .btn,
+html.a11y-contrast .contact-submit {
+  background: #ffef7d !important;
+  color: #000 !important;
+}
+html.a11y-contrast input,
+html.a11y-contrast textarea {
+  background: #000 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+}
+html.a11y-contrast .site-header {
+  background: #000 !important;
+}
+html.a11y-contrast .day-cell.is-available { background: #000 !important; color: #fff !important; border-color: #fff !important; }
+html.a11y-contrast .day-cell.is-selected,
+html.a11y-contrast .day-cell.is-in-range { background: #ffef7d !important; color: #000 !important; }
+
+/* ---- Mode: underline links ---- */
+html.a11y-links a {
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+}
+
+/* ---- Mode: readable font ---- */
+html.a11y-readable body,
+html.a11y-readable h1,
+html.a11y-readable h2,
+html.a11y-readable h3,
+html.a11y-readable .brand,
+html.a11y-readable .eyebrow,
+html.a11y-readable * {
+  font-family: Arial, "Segoe UI", sans-serif !important;
+}
+
+/* ---- Mode: no motion (user toggle + OS preference) ---- */
+html.a11y-no-motion *,
+html.a11y-no-motion *::before,
+html.a11y-no-motion *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}

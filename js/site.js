@@ -36,6 +36,17 @@
     document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
     $$(".lang-toggle button").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.lang === lang);
+      btn.setAttribute("aria-pressed", btn.dataset.lang === lang ? "true" : "false");
+    });
+    const navToggleBtn = $("#navToggle");
+    if (navToggleBtn) navToggleBtn.setAttribute("aria-label", lang === "he" ? "פתיחת תפריט ניווט" : "Open navigation menu");
+  }
+
+  // all inline SVGs on this site are decorative — hide them from screen readers
+  function hideDecorativeSvgs() {
+    $$("svg:not([aria-hidden])").forEach((s) => {
+      s.setAttribute("aria-hidden", "true");
+      s.setAttribute("focusable", "false");
     });
   }
 
@@ -58,6 +69,7 @@
     renderGallery();
     renderCalendarMonths();
     updateSummary();
+    hideDecorativeSvgs();
   }
 
   function setLang(newLang) {
@@ -81,8 +93,14 @@
 
   const navToggle = $("#navToggle");
   const mainNav = $("#mainNav");
-  navToggle.addEventListener("click", () => mainNav.classList.toggle("open"));
-  $$("#mainNav a").forEach((a) => a.addEventListener("click", () => mainNav.classList.remove("open")));
+  navToggle.addEventListener("click", () => {
+    const open = mainNav.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  $$("#mainNav a").forEach((a) => a.addEventListener("click", () => {
+    mainNav.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+  }));
 
   /* ---------------- Hero slideshow ---------------- */
   let heroSlideIndex = 0;
@@ -112,7 +130,10 @@
 
     heroSlideIndex = 0;
     clearInterval(heroAutoplayTimer);
-    if (multi) heroAutoplayTimer = setInterval(() => goToHeroSlide(heroSlideIndex + 1), 6000);
+    const motionOk =
+      !document.documentElement.classList.contains("a11y-no-motion") &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (multi && motionOk) heroAutoplayTimer = setInterval(() => goToHeroSlide(heroSlideIndex + 1), 6000);
   }
 
   function goToHeroSlide(i) {
@@ -226,7 +247,19 @@
       images.forEach((img, i) => {
         const fig = document.createElement("figure");
         fig.innerHTML = '<img src="' + img.file + '" alt="' + GALLERY_CAT_LABELS[cat][lang] + '" loading="lazy">';
+        fig.tabIndex = 0;
+        fig.setAttribute("role", "button");
+        fig.setAttribute(
+          "aria-label",
+          GALLERY_CAT_LABELS[cat][lang] + " " + (i + 1) + "/" + images.length + (lang === "he" ? " — הצגה מוגדלת" : " — view larger")
+        );
         fig.addEventListener("click", () => openLightbox(cat, i));
+        fig.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openLightbox(cat, i);
+          }
+        });
         grid.appendChild(fig);
       });
       section.appendChild(grid);
@@ -243,6 +276,8 @@
   const lightboxCategoryEl = $("#lightboxCategory");
   const lightboxCounterEl = $("#lightboxCounter");
 
+  let lightboxReturnFocus = null;
+
   function openLightbox(cat, i) {
     lightboxCat = cat;
     lightboxImages = data.images.filter((img) => tagToCategory(img.tag) === cat);
@@ -250,16 +285,21 @@
     updateLightbox();
     lightbox.hidden = false;
     document.body.style.overflow = "hidden";
+    lightboxReturnFocus = document.activeElement;
+    $("#lightboxClose").focus();
   }
 
   function closeLightbox() {
     lightbox.hidden = true;
     document.body.style.overflow = "";
+    if (lightboxReturnFocus && typeof lightboxReturnFocus.focus === "function") lightboxReturnFocus.focus();
+    lightboxReturnFocus = null;
   }
 
   function updateLightbox() {
     if (!lightboxImages.length) return;
     lightboxImg.src = lightboxImages[lightboxIndex].file;
+    lightboxImg.alt = GALLERY_CAT_LABELS[lightboxCat][lang] + " " + (lightboxIndex + 1) + "/" + lightboxImages.length;
     if (lightboxCategoryEl) lightboxCategoryEl.textContent = GALLERY_CAT_LABELS[lightboxCat][lang];
     if (lightboxCounterEl) lightboxCounterEl.textContent = (lightboxIndex + 1) + " / " + lightboxImages.length;
   }
@@ -380,7 +420,11 @@
         }
 
         const priceHtml = isPast || info.closed ? '<span class="price-tag muted">—</span>' : `<span class="price-tag">${fmtMoney(info.price)}</span>`;
-        rowCells += `<td><button type="button" class="${cls}" data-date="${dateKey}" ${isPast || info.closed ? "disabled" : ""}>${dayNum}${priceHtml}</button></td>`;
+        const dayAria = `${dayNum} ${monthNames[month]} ${year}` +
+          (isPast || info.closed
+            ? (lang === "he" ? " — לא זמין" : " — unavailable")
+            : `, ${fmtMoney(info.price)}`);
+        rowCells += `<td><button type="button" class="${cls}" data-date="${dateKey}" aria-label="${dayAria}" ${isPast || info.closed ? "disabled" : ""}>${dayNum}${priceHtml}</button></td>`;
       }
       rows += `<tr>${rowCells}</tr>`;
     }
@@ -588,6 +632,78 @@
       submitBtn.textContent = t("formSubmit") || "שליחת בקשה ←";
     }
   });
+
+  /* ---------------- Accessibility menu (IS 5568) ---------------- */
+  const A11Y_MODES = ["large-text", "contrast", "links", "readable", "no-motion"];
+  const a11yToggle = $("#a11yToggle");
+  const a11yPanel = $("#a11yPanel");
+
+  function loadA11yPrefs() {
+    try {
+      return JSON.parse(localStorage.getItem("villaA11y")) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveA11yPrefs(prefs) {
+    localStorage.setItem("villaA11y", JSON.stringify(prefs));
+  }
+
+  function applyA11yPrefs() {
+    const prefs = loadA11yPrefs();
+    A11Y_MODES.forEach((mode) => {
+      const on = !!prefs[mode];
+      document.documentElement.classList.toggle("a11y-" + mode, on);
+      const btn = $(`.a11y-panel button[data-a11y="${mode}"]`);
+      if (btn) btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  if (a11yToggle && a11yPanel) {
+    a11yToggle.addEventListener("click", () => {
+      const open = a11yPanel.hidden;
+      a11yPanel.hidden = !open;
+      a11yToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !a11yPanel.hidden) {
+        a11yPanel.hidden = true;
+        a11yToggle.setAttribute("aria-expanded", "false");
+        a11yToggle.focus();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!a11yPanel.hidden && !e.target.closest(".a11y-widget")) {
+        a11yPanel.hidden = true;
+        a11yToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    $$(".a11y-panel button[data-a11y]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const prefs = loadA11yPrefs();
+        const mode = btn.dataset.a11y;
+        prefs[mode] = !prefs[mode];
+        saveA11yPrefs(prefs);
+        applyA11yPrefs();
+        if (mode === "no-motion") renderHero(); // stop/restart the hero autoplay
+      });
+    });
+
+    const a11yResetBtn = $("#a11yReset");
+    if (a11yResetBtn) {
+      a11yResetBtn.addEventListener("click", () => {
+        localStorage.removeItem("villaA11y");
+        applyA11yPrefs();
+        renderHero();
+      });
+    }
+
+    applyA11yPrefs();
+  }
 
   /* ---------------- Init ---------------- */
   $("#year").textContent = new Date().getFullYear();
