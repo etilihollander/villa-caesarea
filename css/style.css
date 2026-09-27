@@ -1763,3 +1763,32 @@ html.a11y-no-motion *::after {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
+/* ---------- Stay breakdown (extra-guest surcharge) & check-in times ---------- */
+.stay-breakdown {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.stay-breakdown:empty { display: none; }
+.stay-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.84rem;
+  color: var(--color-ink-soft);
+}
+.stay-breakdown-row span:last-child {
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.stay-times {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-ink-soft);
+  letter-spacing: 0.01em;
+}
+.stay-times:empty { display: none; }
