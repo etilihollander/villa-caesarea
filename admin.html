@@ -285,6 +285,15 @@
             <div class="field"><label>מחיר בסיס ללילה (₪, כשאין מחיר מיוחד)</label><input type="number" id="f-basePrice"></div>
             <div class="field"><label>מינימום לילות להזמנה</label><input type="number" id="f-minNights"></div>
           </div>
+          <div class="two-col">
+            <div class="field"><label>מספר אורחים הכלול במחיר הבסיס</label><input type="number" id="f-guestsIncluded" min="1" max="20" placeholder="למשל: 12"></div>
+            <div class="field"><label>תוספת ללילה לכל אורח נוסף (₪)</label><input type="number" id="f-extraGuestFee" min="0" placeholder="למשל: 300"></div>
+          </div>
+          <div class="settings-note">לדוגמה: מחיר בסיס 12,000 ₪ הכולל עד 12 אורחים, ותוספת 300 ₪ לאורח — שהייה של 14 אורחים תחושב כ-12,600 ₪ ללילה. השאירו את התוספת על 0 כדי לבטל את החישוב.</div>
+          <div class="two-col">
+            <div class="field"><label>שעת כניסה (צ'ק אין)</label><input type="time" id="f-checkinTime"></div>
+            <div class="field"><label>שעת יציאה (צ'ק אאוט)</label><input type="time" id="f-checkoutTime"></div>
+          </div>
           <div class="field"><label>אימייל לקבלת פניות (מוצג גם באתר)</label><input type="email" id="f-contactEmail"></div>
           <div class="two-col">
             <div class="field"><label>טלפון (מוצג באתר בצור קשר)</label><input type="tel" id="f-contactPhone" placeholder="למשל: 050-1234567"></div>

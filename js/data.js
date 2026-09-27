@@ -56,6 +56,8 @@ async function loadData() {
     businessId: contentRow.business_id || "",
     businessAddress: contentRow.business_address || "",
     vatIncluded: contentRow.vat_included !== false,
+    checkinTime: contentRow.checkin_time || "",
+    checkoutTime: contentRow.checkout_time || "",
     content: {
       en: contentRow.content_en,
       he: contentRow.content_he
@@ -66,6 +68,10 @@ async function loadData() {
       currencySymbol: contentRow.currency_symbol,
       basePrice: Number(contentRow.base_price),
       minNights: contentRow.min_nights,
+      // base price covers up to guestsIncluded; each guest beyond that adds
+      // extraGuestFee per night
+      guestsIncluded: Number(contentRow.guests_included) || 0,
+      extraGuestFee: Number(contentRow.extra_guest_fee) || 0,
       days: dayMap
     }
   };
@@ -84,7 +90,8 @@ async function updateContent(lang, contentObj) {
 
 async function updateSettings({
   basePrice, minNights, contactEmail, contactPhone, contactInstagram,
-  businessName, businessId, businessAddress, vatIncluded
+  businessName, businessId, businessAddress, vatIncluded,
+  guestsIncluded, extraGuestFee, checkinTime, checkoutTime
 }) {
   const { error } = await sb
     .from("site_content")
@@ -98,6 +105,10 @@ async function updateSettings({
       business_id: businessId ?? "",
       business_address: businessAddress ?? "",
       vat_included: vatIncluded !== false,
+      guests_included: guestsIncluded ?? 0,
+      extra_guest_fee: extraGuestFee ?? 0,
+      checkin_time: checkinTime ?? "",
+      checkout_time: checkoutTime ?? "",
       updated_at: new Date().toISOString()
     })
     .eq("id", 1);
@@ -109,7 +120,7 @@ async function updateSettings({
 async function loadLegalInfo() {
   const { data, error } = await sb
     .from("site_content")
-    .select("business_name, business_id, business_address, contact_email, contact_phone, vat_included")
+    .select("business_name, business_id, business_address, contact_email, contact_phone, vat_included, checkin_time, checkout_time")
     .eq("id", 1)
     .single();
   if (error) throw error;
@@ -119,7 +130,9 @@ async function loadLegalInfo() {
     businessAddress: data.business_address || "",
     contactEmail: data.contact_email || "",
     contactPhone: data.contact_phone || "",
-    vatIncluded: data.vat_included !== false
+    vatIncluded: data.vat_included !== false,
+    checkinTime: data.checkin_time || "",
+    checkoutTime: data.checkout_time || ""
   };
 }
 
