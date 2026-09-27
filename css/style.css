@@ -1559,6 +1559,42 @@ html[dir="rtl"] .a11y-widget { font-family: "Assistant", sans-serif; }
 }
 .a11y-toggle:hover { transform: scale(1.06); }
 .a11y-toggle svg { width: 26px; height: 26px; }
+
+/* small "minimize" control, revealed on hover/keyboard focus */
+.a11y-hide {
+  position: absolute;
+  top: -7px;
+  inset-inline-start: -7px;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  background: var(--color-ink-soft);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.a11y-widget:hover .a11y-hide,
+.a11y-widget:focus-within .a11y-hide { opacity: 1; }
+
+/* minimized: small translucent dot that restores on click */
+.a11y-widget.is-min .a11y-hide { display: none; }
+.a11y-widget.is-min .a11y-panel { display: none; }
+.a11y-widget.is-min .a11y-toggle {
+  width: 30px;
+  height: 30px;
+  opacity: 0.45;
+}
+.a11y-widget.is-min .a11y-toggle svg { width: 17px; height: 17px; }
+.a11y-widget.is-min .a11y-toggle:hover,
+.a11y-widget.is-min .a11y-toggle:focus-visible { opacity: 1; }
 .a11y-panel {
   position: absolute;
   bottom: 58px;
