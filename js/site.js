@@ -40,6 +40,9 @@
     });
     const navToggleBtn = $("#navToggle");
     if (navToggleBtn) navToggleBtn.setAttribute("aria-label", lang === "he" ? "פתיחת תפריט ניווט" : "Open navigation menu");
+    const a11yHideEl = $("#a11yHide");
+    if (a11yHideEl) a11yHideEl.setAttribute("aria-label", lang === "he" ? "מזעור כפתור הנגישות" : "Minimize accessibility button");
+    applyA11yMinimized(); // refresh the a11y toggle label in the current language
   }
 
   // all inline SVGs on this site are decorative — hide them from screen readers
@@ -660,12 +663,46 @@
     });
   }
 
+  const a11yWidget = $("#a11yWidget");
+  const a11yHideBtn = $("#a11yHide");
+
+  function applyA11yMinimized() {
+    const min = localStorage.getItem("villaA11yMin") === "1";
+    if (a11yWidget) a11yWidget.classList.toggle("is-min", min);
+    if (a11yToggle) {
+      a11yToggle.setAttribute(
+        "aria-label",
+        min
+          ? (lang === "he" ? "הצגת כפתור הנגישות" : "Show accessibility button")
+          : (lang === "he" ? "תפריט נגישות" : "Accessibility menu")
+      );
+    }
+  }
+
   if (a11yToggle && a11yPanel) {
     a11yToggle.addEventListener("click", () => {
+      // when minimized, the first click only restores the full-size button
+      if (a11yWidget && a11yWidget.classList.contains("is-min")) {
+        localStorage.removeItem("villaA11yMin");
+        applyA11yMinimized();
+        return;
+      }
       const open = a11yPanel.hidden;
       a11yPanel.hidden = !open;
       a11yToggle.setAttribute("aria-expanded", open ? "true" : "false");
     });
+
+    if (a11yHideBtn) {
+      a11yHideBtn.addEventListener("click", () => {
+        localStorage.setItem("villaA11yMin", "1");
+        a11yPanel.hidden = true;
+        a11yToggle.setAttribute("aria-expanded", "false");
+        applyA11yMinimized();
+        a11yToggle.focus();
+      });
+    }
+
+    applyA11yMinimized();
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !a11yPanel.hidden) {
