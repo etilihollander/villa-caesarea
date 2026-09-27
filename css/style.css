@@ -1754,3 +1754,12 @@ html.a11y-no-motion *::after {
 @media (max-width: 720px) {
   .contact-channels { flex-direction: column; align-items: center; gap: 0.7rem; }
 }
+
+/* ---------- Footer legal links ---------- */
+.footer-legal-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
