@@ -1732,3 +1732,25 @@ html.a11y-no-motion *::after {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Contact channels (phone / email / instagram) ---------- */
+.contact-channels {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 2rem;
+  margin-top: 1.2rem;
+}
+.contact-channel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  color: var(--color-accent-dark);
+  transition: color 0.2s ease;
+}
+.contact-channel:hover { color: var(--color-ink); text-decoration: underline; }
+.contact-channel svg { width: 17px; height: 17px; flex-shrink: 0; }
+@media (max-width: 720px) {
+  .contact-channels { flex-direction: column; align-items: center; gap: 0.7rem; }
+}
