@@ -52,6 +52,10 @@ async function loadData() {
     contactEmail: contentRow.contact_email,
     contactPhone: contentRow.contact_phone || "",
     contactInstagram: contentRow.contact_instagram || "",
+    businessName: contentRow.business_name || "",
+    businessId: contentRow.business_id || "",
+    businessAddress: contentRow.business_address || "",
+    vatIncluded: contentRow.vat_included !== false,
     content: {
       en: contentRow.content_en,
       he: contentRow.content_he
@@ -78,7 +82,10 @@ async function updateContent(lang, contentObj) {
   if (error) throw error;
 }
 
-async function updateSettings({ basePrice, minNights, contactEmail, contactPhone, contactInstagram }) {
+async function updateSettings({
+  basePrice, minNights, contactEmail, contactPhone, contactInstagram,
+  businessName, businessId, businessAddress, vatIncluded
+}) {
   const { error } = await sb
     .from("site_content")
     .update({
@@ -87,10 +94,33 @@ async function updateSettings({ basePrice, minNights, contactEmail, contactPhone
       contact_email: contactEmail,
       contact_phone: contactPhone ?? "",
       contact_instagram: contactInstagram ?? "",
+      business_name: businessName ?? "",
+      business_id: businessId ?? "",
+      business_address: businessAddress ?? "",
+      vat_included: vatIncluded !== false,
       updated_at: new Date().toISOString()
     })
     .eq("id", 1);
   if (error) throw error;
+}
+
+/* Business identity for the legal pages — a lightweight public read used by
+   privacy.html / terms.html, which do not load the full site data layer. */
+async function loadLegalInfo() {
+  const { data, error } = await sb
+    .from("site_content")
+    .select("business_name, business_id, business_address, contact_email, contact_phone, vat_included")
+    .eq("id", 1)
+    .single();
+  if (error) throw error;
+  return {
+    businessName: data.business_name || "",
+    businessId: data.business_id || "",
+    businessAddress: data.business_address || "",
+    contactEmail: data.contact_email || "",
+    contactPhone: data.contact_phone || "",
+    vatIncluded: data.vat_included !== false
+  };
 }
 
 /* ---------------- Calendar writes (admin only) ---------------- */
