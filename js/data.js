@@ -50,6 +50,8 @@ async function loadData() {
 
   return {
     contactEmail: contentRow.contact_email,
+    contactPhone: contentRow.contact_phone || "",
+    contactInstagram: contentRow.contact_instagram || "",
     content: {
       en: contentRow.content_en,
       he: contentRow.content_he
@@ -76,13 +78,15 @@ async function updateContent(lang, contentObj) {
   if (error) throw error;
 }
 
-async function updateSettings({ basePrice, minNights, contactEmail }) {
+async function updateSettings({ basePrice, minNights, contactEmail, contactPhone, contactInstagram }) {
   const { error } = await sb
     .from("site_content")
     .update({
       base_price: basePrice,
       min_nights: minNights,
       contact_email: contactEmail,
+      contact_phone: contactPhone ?? "",
+      contact_instagram: contactInstagram ?? "",
       updated_at: new Date().toISOString()
     })
     .eq("id", 1);

@@ -72,7 +72,59 @@
     renderGallery();
     renderCalendarMonths();
     updateSummary();
+    renderContactChannels();
     hideDecorativeSvgs();
+  }
+
+  /* ---------------- Contact channels (phone / email / instagram) ---------------- */
+  function renderContactChannels() {
+    const wrap = $("#contactChannels");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+
+    const channels = [];
+    if (data.contactPhone) {
+      channels.push({
+        href: "tel:" + data.contactPhone.replace(/[^+\d]/g, ""),
+        label: lang === "he" ? "התקשרו אלינו" : "Call us",
+        text: data.contactPhone,
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
+      });
+    }
+    if (data.contactEmail) {
+      channels.push({
+        href: "mailto:" + data.contactEmail,
+        label: lang === "he" ? "שלחו לנו מייל" : "Email us",
+        text: data.contactEmail,
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>'
+      });
+    }
+    if (data.contactInstagram) {
+      const handle = data.contactInstagram.replace(/^@/, "");
+      const url = /^https?:\/\//i.test(data.contactInstagram)
+        ? data.contactInstagram
+        : "https://www.instagram.com/" + handle;
+      channels.push({
+        href: url,
+        external: true,
+        label: lang === "he" ? "עקבו אחרינו באינסטגרם" : "Follow us on Instagram",
+        text: lang === "he" ? "אינסטגרם" : "Instagram",
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>'
+      });
+    }
+
+    channels.forEach((ch) => {
+      const a = document.createElement("a");
+      a.className = "contact-channel";
+      a.href = ch.href;
+      a.setAttribute("aria-label", ch.label);
+      if (ch.external) {
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+      }
+      a.innerHTML = ch.icon + '<span dir="ltr">' + ch.text + "</span>";
+      wrap.appendChild(a);
+    });
   }
 
   function setLang(newLang) {

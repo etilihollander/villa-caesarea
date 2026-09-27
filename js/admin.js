@@ -321,14 +321,14 @@
 
       const delBtn = document.createElement("button");
       delBtn.type = "button";
-      delBtn.textContent = "✕";
-      delBtn.style.cssText = "font-size:0.7rem;background:#fff;border:none;padding:2px 7px;cursor:pointer;color:#b96a55;";
+      delBtn.textContent = "מחיקה לצמיתות";
+      delBtn.style.cssText = "font-size:0.6rem;background:#b96a55;border:none;padding:2px 7px;cursor:pointer;color:#fff;font-weight:600;border-radius:3px;";
       delBtn.addEventListener("click", async () => {
         if (data.images.length <= 1) {
           alert("חייבת להישאר לפחות תמונה אחת.");
           return;
         }
-        if (confirm("להסיר את התמונה?")) {
+        if (confirm("למחוק את התמונה לצמיתות? פעולה זו אינה ניתנת לביטול והתמונה תוסר גם מהאתר וגם מהאחסון.")) {
           delBtn.disabled = true;
           try {
             await deleteImageRow(img.id, img.file);
@@ -847,6 +847,8 @@
     $("#f-basePrice").value = data.pricing.basePrice;
     $("#f-minNights").value = data.pricing.minNights;
     $("#f-contactEmail").value = data.contactEmail;
+    $("#f-contactPhone").value = data.contactPhone || "";
+    $("#f-contactInstagram").value = data.contactInstagram || "";
     const session = await getAdminSession();
     if (session && session.user) $("#f-adminEmail").value = session.user.email;
   }
@@ -858,7 +860,9 @@
       await updateSettings({
         basePrice: Number($("#f-basePrice").value) || data.pricing.basePrice,
         minNights: Number($("#f-minNights").value) || data.pricing.minNights,
-        contactEmail: $("#f-contactEmail").value || data.contactEmail
+        contactEmail: $("#f-contactEmail").value || data.contactEmail,
+        contactPhone: $("#f-contactPhone").value.trim(),
+        contactInstagram: $("#f-contactInstagram").value.trim()
       });
       await refreshAllData();
       flashStatus("#settingsSaveStatus");
