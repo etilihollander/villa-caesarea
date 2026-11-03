@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אירועים חגיגיים בווילה גפן — חוגגים בוילה פרטית בקיסריה</title>
+<meta name="description" content="התארגנות לחתונה, ברית או בריתה, ימי הולדת ואירועים משפחתיים — כחלק משהייה בווילה גפן, וילת יוקרה פרטית בקיסריה עם בריכה פרטית וגינה. בתיאום מראש בלבד.">
+<link rel="canonical" href="/celebrations">
+<link rel="alternate" hreflang="he" href="/celebrations?lang=he">
+<link rel="alternate" hreflang="en" href="/celebrations?lang=en">
+<link rel="alternate" hreflang="x-default" href="/celebrations">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="אירועים חגיגיים בווילה גפן — חוגגים בוילה פרטית בקיסריה">
+<meta property="og:description" content="התארגנות לחתונה, ברית או בריתה, ימי הולדת ואירועים משפחתיים — כחלק משהייה בווילה גפן, וילת יוקרה פרטית בקיסריה.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=David+Libre:wght@400;500;700&family=Jost:wght@300;400;500&family=Assistant:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/celebrations.css">
+</head>
+<body>
+
+<a href="#mainContent" class="skip-link" data-i18n="a11ySkipLink">דילוג לתוכן הראשי</a>
+
+<header class="site-header" id="siteHeader">
+  <a href="index.html" class="brand" data-i18n="villaName">Villa Gefen</a>
+
+  <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+    <a href="index.html#home" data-i18n="navHome">Home</a>
+    <a href="index.html#about" data-i18n="navAbout">The Villa</a>
+    <a href="index.html#gallery" data-i18n="navGallery">Gallery</a>
+    <a href="index.html#amenities" data-i18n="navAmenities">Amenities</a>
+    <a href="celebrations.html" id="navCelebrations" class="is-current" aria-current="page">חוגגים בווילה</a>
+    <a href="index.html#availability" data-i18n="navAvailability">Availability</a>
+    <a href="index.html#contact" data-i18n="navContact">Enquire</a>
+    <div class="lang-toggle" id="langToggleMobile">
+      <button data-lang="en">EN</button>
+      <button data-lang="he">עב</button>
+    </div>
+  </nav>
+
+  <div style="display:flex; align-items:center; gap:1rem;">
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="mainNav">&#9776;</button>
+  </div>
+</header>
+
+<main id="mainContent">
+
+<section class="cel-hero" id="celHero">
+  <div class="cel-hero-media">
+    <img id="celHeroImage" alt="" hidden>
+  </div>
+  <div class="cel-hero-content container">
+    <span class="eyebrow" id="celHeroEyebrow"></span>
+    <h1 id="celHeroTitle"></h1>
+    <p class="cel-hero-intro" id="celHeroIntro"></p>
+  </div>
+</section>
+
+<section class="cel-notice-wrap">
+  <div class="container">
+    <p class="cel-notice" id="celNotice"></p>
+  </div>
+</section>
+
+<section class="section cel-categories-section" id="celebrationTypes">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" id="celCatEyebrow"></span>
+      <div class="villa-diamond-divider"><span class="diamond"></span></div>
+      <h2 id="celCatTitle"></h2>
+      <p id="celCatDesc"></p>
+    </div>
+    <div class="cel-categories" id="celCategories"></div>
+  </div>
+</section>
+
+<section class="section section-alt cel-why-section" id="celWhy">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow" id="celWhyEyebrow"></span>
+      <div class="villa-diamond-divider"><span class="diamond"></span></div>
+      <h2 id="celWhyTitle"></h2>
+      <p id="celWhyDesc"></p>
+    </div>
+    <div class="cel-why-grid" id="celWhyGrid"></div>
+  </div>
+</section>
+
+<section class="section cel-cta-section" id="celContact">
+  <div class="container">
+    <div class="cel-cta">
+      <span class="eyebrow" id="celCtaEyebrow"></span>
+      <div class="contact-head-divider"><span class="diamond"></span></div>
+      <h2 id="celCtaTitle"></h2>
+      <p class="cel-cta-desc" id="celCtaDesc"></p>
+      <div class="cel-cta-actions" id="celCtaActions"></div>
+      <div class="contact-channels" id="celCtaChannels"></div>
+      <p class="cel-cta-note" id="celCtaNote"></p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image gallery" hidden>
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous image">&#8249;</button>
+  <img id="lightboxImg" alt="">
+  <button class="lightbox-next" id="lightboxNext" aria-label="Next image">&#8250;</button>
+  <div class="lightbox-info">
+    <span class="lightbox-category" id="lightboxCategory"></span>
+    <span class="lightbox-counter" id="lightboxCounter"></span>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="brand" data-i18n="villaName">Villa Gefen</div>
+  <p data-i18n="footerTagline">Villa Gefen — a private luxury rental</p>
+  <p>&copy; <span id="year"></span> — <span data-i18n="footerRights">All rights reserved.</span></p>
+  <p class="footer-legal-links">
+    <a href="accessibility.html" class="footer-a11y-link" data-i18n="a11yStatementLink">הצהרת נגישות</a>
+    <span aria-hidden="true">·</span>
+    <a href="privacy.html" class="footer-a11y-link" data-i18n="privacyLink">מדיניות פרטיות</a>
+    <span aria-hidden="true">·</span>
+    <a href="terms.html" class="footer-a11y-link" data-i18n="termsLink">תקנון האתר</a>
+  </p>
+  <a href="admin.html" class="footer-admin-link">Admin</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/legal.js"></script>
+<script src="js/celebrations.js"></script>
+</body>
+</html>

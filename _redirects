@@ -1,0 +1,6 @@
+# Netlify rewrites — clean URLs.
+# A 200 rewrite serves the file without changing the address bar, so the
+# celebrations page lives at /celebrations in both languages
+# (/celebrations?lang=he and /celebrations?lang=en are the hreflang targets;
+# query strings are forwarded automatically).
+/celebrations   /celebrations.html   200

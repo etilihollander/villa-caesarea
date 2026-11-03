@@ -1,6 +1,6 @@
 /* ===================================================================
    Villa Gefen — shared logic for the static legal pages
-   (accessibility.html / privacy.html / terms.html)
+   (accessibility.html / privacy.html / terms.html, celebrations.html)
 
    These pages are plain HTML and do not load the full site data layer,
    so this file does two things:

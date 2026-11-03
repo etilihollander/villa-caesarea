@@ -4,8 +4,20 @@
 
 (async function () {
   let data;
+  // Content for the celebrations page: the home page only needs it for the
+  // nav item and the promo teaser, so a failure here must never take the
+  // rest of the site down.
+  let celebrations = null;
+  async function loadCelebrationsSafe() {
+    try {
+      return await loadCelebrations();
+    } catch (err) {
+      console.error("Failed to load celebrations content", err);
+      return null;
+    }
+  }
   try {
-    data = await loadData();
+    [data, celebrations] = await Promise.all([loadData(), loadCelebrationsSafe()]);
   } catch (err) {
     console.error("Failed to load villa data from Supabase", err);
     document.body.innerHTML =
@@ -74,7 +86,49 @@
     updateSummary();
     renderContactChannels();
     renderVatNote();
+    renderCelebrations();
     hideDecorativeSvgs();
+  }
+
+  /* ---------------- Celebrations page: nav item + home-page promo ---------------- */
+  function renderCelebrations() {
+    const navLink = $("#navCelebrations");
+    const promo = $("#celebrationsPromo");
+    if (!celebrations) {
+      if (navLink) navLink.hidden = true;
+      if (promo) promo.hidden = true;
+      return;
+    }
+
+    if (navLink) {
+      const label = celebrations.nav[lang] || celebrations.nav.he || celebrations.nav.en;
+      navLink.textContent = label;
+      navLink.hidden = !label;
+    }
+
+    if (!promo) return;
+    const p = celebrations.promo;
+    const copy = p[lang];
+    promo.hidden = !p.enabled || !(copy.title || copy.desc);
+    if (promo.hidden) return;
+
+    $("#celPromoEyebrow").textContent = copy.eyebrow || "";
+    $("#celPromoTitle").textContent = copy.title || "";
+    $("#celPromoDesc").textContent = copy.desc || "";
+    $("#celPromoBtn").textContent = copy.button || "";
+
+    const img = $("#celPromoImage");
+    const placeholder = $("#celPromoPlaceholder");
+    if (p.image.url) {
+      img.src = p.image.url;
+      img.alt = p.image.alt[lang] || copy.title || "";
+      img.hidden = false;
+      placeholder.hidden = true;
+    } else {
+      img.removeAttribute("src");
+      img.hidden = true;
+      placeholder.hidden = false;
+    }
   }
 
   // Consumer protection law requires stating whether displayed prices include VAT
@@ -820,7 +874,9 @@
     clearTimeout(refreshTimer);
     refreshTimer = setTimeout(async () => {
       try {
-        data = await loadData();
+        const [fresh, freshCelebrations] = await Promise.all([loadData(), loadCelebrationsSafe()]);
+        data = fresh;
+        celebrations = freshCelebrations;
         applyI18n();
       } catch (err) {
         console.error("Failed to refresh villa data", err);

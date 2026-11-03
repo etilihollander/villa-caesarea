@@ -519,3 +519,200 @@ body.admin-body {
   .admin-nav { flex-direction: row; flex-wrap: wrap; }
   .two-col { grid-template-columns: 1fr; }
 }
+
+/* ==================================================================
+   Celebrations panel ("חוגגים בווילה")
+   ================================================================== */
+.cel-section-head { margin: 2.2rem 0 1rem; }
+.cel-section-head h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+.cel-section-head p.desc { color: var(--color-ink-soft); font-size: 0.88rem; margin: 0; }
+
+.cel-dirty-note { font-size: 0.8rem; color: var(--color-closed); }
+
+/* ---- image slot ---- */
+.cel-image-editor {
+  border: 1px dashed var(--color-line);
+  border-radius: 6px;
+  padding: 0.9rem;
+  background: #fcfaf7;
+}
+.cel-image-editor > label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.7rem;
+}
+.cel-image-row { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+.cel-image-preview {
+  width: 150px;
+  height: 112px;
+  flex: none;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-bg-alt);
+}
+.cel-image-preview img { width: 100%; height: 100%; object-fit: cover; }
+.cel-image-preview.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+}
+.cel-image-actions { display: flex; flex-direction: column; gap: 0.5rem; min-width: 190px; }
+.cel-upload-btn {
+  display: inline-block;
+  text-align: center;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-ink);
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.cel-upload-btn:hover { background: var(--color-accent-dark); border-color: var(--color-accent-dark); }
+.cel-image-picker {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--color-line);
+  font-size: 0.8rem;
+  background: #fff;
+  border-radius: 4px;
+}
+.cel-danger-btn {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--color-closed);
+  background: #fff;
+  color: var(--color-closed);
+  font-size: 0.78rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.cel-danger-btn:hover { background: var(--color-closed); color: #fff; }
+.cel-image-editor .field { margin-top: 0.9rem; }
+
+/* ---- category cards ---- */
+.cel-category-card { border-inline-start: 3px solid var(--color-accent); }
+.cel-category-card.is-hidden-cat { opacity: 0.72; border-inline-start-color: var(--color-line); }
+.cel-cat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--color-line);
+}
+.cel-cat-head h3 { margin: 0; }
+.cel-cat-controls { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.cel-cat-controls button,
+.cel-why-controls button,
+.cel-tile-bar button {
+  border: 1px solid var(--color-line);
+  background: #fff;
+  color: var(--color-ink);
+  font-size: 0.74rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.cel-cat-controls button:hover:not(:disabled),
+.cel-why-controls button:hover:not(:disabled),
+.cel-tile-bar button:hover:not(:disabled) { background: var(--color-bg-alt); }
+.cel-cat-controls button:disabled,
+.cel-why-controls button:disabled,
+.cel-tile-bar button:disabled { opacity: 0.35; cursor: not-allowed; }
+.cel-cat-controls button.is-danger,
+.cel-why-controls button.is-danger,
+.cel-tile-bar button.is-danger { color: var(--color-closed); border-color: var(--color-closed); }
+.cel-cat-controls button.is-danger:hover,
+.cel-why-controls button.is-danger:hover,
+.cel-tile-bar button.is-danger:hover { background: var(--color-closed); color: #fff; }
+
+/* ---- per-category gallery ---- */
+.cel-gallery-editor {
+  border-top: 1px solid var(--color-line);
+  padding-top: 1.1rem;
+}
+.cel-subhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+.cel-subhead strong { font-size: 0.9rem; }
+.cel-subhead span { font-size: 0.8rem; color: var(--color-ink-soft); }
+.cel-gallery-upload { padding: 1rem; font-size: 0.82rem; margin-bottom: 0.9rem; }
+.cel-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.7rem;
+}
+.cel-gallery-tile {
+  border: 1px solid var(--color-line);
+  border-radius: 5px;
+  overflow: hidden;
+  background: #fff;
+}
+.cel-gallery-tile > img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.cel-tile-bar {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  border-top: 1px solid var(--color-line);
+}
+.cel-tile-bar button { flex: 1; padding: 0.25rem 0.2rem; }
+.cel-tile-alt {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--color-line);
+  padding: 0.4rem 0.5rem;
+  font-size: 0.76rem;
+  font-family: inherit;
+}
+.cel-tile-alt:focus { outline: 1px solid var(--color-accent); outline-offset: -1px; }
+
+/* ---- "why Villa Gefen" rows ---- */
+.cel-why-items { display: flex; flex-direction: column; gap: 0.8rem; }
+.cel-why-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.7rem;
+  border: 1px solid var(--color-line);
+  border-radius: 5px;
+  background: #fcfaf7;
+}
+.cel-why-row > select {
+  width: 130px;
+  flex: none;
+  padding: 0.4rem 0.3rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--color-line);
+  background: #fff;
+  border-radius: 4px;
+}
+.cel-why-fields { flex: 1; display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+.cel-why-fields input,
+.cel-why-fields textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-line);
+  font-family: inherit;
+  font-size: 0.86rem;
+  background: #fff;
+  resize: vertical;
+}
+.cel-why-controls { display: flex; flex-direction: column; gap: 0.3rem; flex: none; }
+
+@media (max-width: 720px) {
+  .cel-image-row { flex-direction: column; }
+  .cel-why-row { flex-direction: column; }
+  .cel-why-row > select { width: 100%; }
+  .cel-why-controls { flex-direction: row; }
+}

@@ -42,6 +42,7 @@
     <div class="role-tag">ניהול</div>
     <nav class="admin-nav">
       <button data-panel="content" class="active">תוכן האתר</button>
+      <button data-panel="celebrations">חוגגים בווילה</button>
       <button data-panel="images">תמונות</button>
       <button data-panel="calendar">יומן ומחירים</button>
       <button data-panel="finance">הוצאות והכנסות</button>
@@ -145,6 +146,33 @@
       <div class="save-bar">
         <button class="btn btn-primary" id="saveContentBtn">שמירת שינויים</button>
         <span class="save-status" id="contentSaveStatus">נשמר ✓</span>
+      </div>
+    </section>
+
+    <!-- ---- CELEBRATIONS PANEL ---- -->
+    <section class="admin-panel" id="panel-celebrations">
+      <h2>חוגגים בווילה</h2>
+      <p class="desc">
+        ניהול מלא של עמוד "אירועים חגיגיים בווילה" (<a href="celebrations.html" target="_blank">צפייה בעמוד</a>)
+        ושל קטע הקידום בעמוד הבית. כל הטקסטים נערכים בנפרד בעברית ובאנגלית — החליפו לשון בלשוניות שלמטה.
+      </p>
+
+      <div class="lang-tabs">
+        <button data-cel-lang="he" class="active">עברית</button>
+        <button data-cel-lang="en">English</button>
+      </div>
+
+      <div class="settings-note" style="margin-bottom:1.4rem;">
+        שינויים בתמונות (העלאה, החלפה, סידור ומחיקה) נשמרים מיד.
+        שינויים בטקסטים נשמרים בלחיצה על "שמירת שינויים" בתחתית העמוד — אבל נשמרים גם הם
+        בכל פעולת תמונה, כך שלא ייאבדו במעבר בין לשוניות.
+      </div>
+
+      <div id="celEditor"></div>
+
+      <div class="save-bar">
+        <button class="btn btn-primary" id="saveCelBtn">שמירת שינויים</button>
+        <span class="save-status" id="celSaveStatus">נשמר ✓</span>
       </div>
     </section>
 

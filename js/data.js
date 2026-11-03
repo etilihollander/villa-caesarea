@@ -177,7 +177,11 @@ async function addImageRow(url, tag) {
   return data;
 }
 
-async function uploadImageFile(file) {
+/* Resize/compress in the browser and push the file to Supabase Storage,
+   returning its public URL. Used both by the villa gallery (which also keeps a
+   villa_images row) and by the celebrations page (which stores plain URLs
+   inside its own content document). */
+async function uploadImageToStorage(file, folder) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -194,15 +198,15 @@ async function uploadImageFile(file) {
           canvas.toBlob(
             async (blob) => {
               try {
-                const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+                const dir = folder || "uploads";
+                const path = `${dir}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
                 const { error: upErr } = await sb.storage.from("villa-images").upload(path, blob, {
                   contentType: "image/jpeg",
                   upsert: false
                 });
                 if (upErr) throw upErr;
                 const { data: pub } = sb.storage.from("villa-images").getPublicUrl(path);
-                const row = await addImageRow(pub.publicUrl, "custom");
-                resolve(row);
+                resolve(pub.publicUrl);
               } catch (e) {
                 reject(e);
               }
@@ -222,14 +226,24 @@ async function uploadImageFile(file) {
   });
 }
 
+async function uploadImageFile(file) {
+  const url = await uploadImageToStorage(file, "uploads");
+  return addImageRow(url, "custom");
+}
+
+/* Best-effort removal of a file we uploaded ourselves. Images that live in the
+   repo's images/ folder are served by Netlify and are left alone. */
+async function removeStorageImage(url) {
+  if (!url || !url.includes("/storage/v1/object/public/villa-images/")) return;
+  const path = url.split("/villa-images/")[1];
+  if (path) await sb.storage.from("villa-images").remove([path]);
+}
+
 async function deleteImageRow(id, url) {
   const { error } = await sb.from("villa_images").delete().eq("id", id);
   if (error) throw error;
   // best-effort: also remove from storage if it was an admin-uploaded file
-  if (url && url.includes("/storage/v1/object/public/villa-images/")) {
-    const path = url.split("/villa-images/")[1];
-    if (path) await sb.storage.from("villa-images").remove([path]);
-  }
+  await removeStorageImage(url);
 }
 
 // multiple images can be part of the home slideshow at once
@@ -340,6 +354,119 @@ async function deleteEnquiry(id) {
   if (error) throw error;
 }
 
+/* ===================================================================
+   Celebrations page ("אירועים חגיגיים בווילה")
+
+   The whole page — headings, paragraphs, category list and order, every
+   gallery, the homepage promo box and the SEO strings — is one jsonb
+   document in public.celebrations_content (single row, id = 1), with the
+   same RLS as site_content: public read, authenticated write.
+
+   Per-language text sits in `he` / `en` sub-objects *inside* each node, so
+   structure (which categories exist, their order, their photos) is shared
+   between the two languages and can never drift apart.
+   =================================================================== */
+
+const CELEBRATION_LANGS = ["he", "en"];
+
+function celText(value) {
+  return typeof value === "string" ? value : "";
+}
+
+function celLangPair(raw, keys) {
+  const src = raw && typeof raw === "object" ? raw : {};
+  const out = {};
+  CELEBRATION_LANGS.forEach((lang) => {
+    const node = src[lang] && typeof src[lang] === "object" ? src[lang] : {};
+    out[lang] = {};
+    keys.forEach((k) => (out[lang][k] = celText(node[k])));
+  });
+  return out;
+}
+
+// an image is { url, alt: { he, en } } — a bare string is accepted too
+function celImage(raw) {
+  if (typeof raw === "string") return { url: raw, alt: { he: "", en: "" } };
+  const src = raw && typeof raw === "object" ? raw : {};
+  const alt = src.alt && typeof src.alt === "object" ? src.alt : {};
+  return {
+    url: celText(src.url),
+    alt: { he: celText(alt.he), en: celText(alt.en) }
+  };
+}
+
+function celSlug(value, fallback) {
+  const slug = celText(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w֐-׿-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || fallback;
+}
+
+/* Fills in anything a hand-edited or older document is missing, so neither the
+   public page nor the admin panel ever has to guard against absent keys. */
+function normalizeCelebrations(raw) {
+  const doc = raw && typeof raw === "object" ? raw : {};
+  const why = doc.why && typeof doc.why === "object" ? doc.why : {};
+  const promo = doc.promo && typeof doc.promo === "object" ? doc.promo : {};
+
+  return {
+    version: 1,
+    // the label of the new item in the site's main navigation
+    nav: {
+      he: celText(doc.nav && doc.nav.he),
+      en: celText(doc.nav && doc.nav.en)
+    },
+    seo: celLangPair(doc.seo, ["title", "description"]),
+    hero: Object.assign({ image: celImage(doc.hero && doc.hero.image) }, celLangPair(doc.hero, ["eyebrow", "title", "intro"])),
+    notice: {
+      he: celText(doc.notice && doc.notice.he),
+      en: celText(doc.notice && doc.notice.en)
+    },
+    categoriesHead: celLangPair(doc.categoriesHead, ["eyebrow", "title", "desc"]),
+    categories: (Array.isArray(doc.categories) ? doc.categories : []).map((cat, i) => {
+      const src = cat && typeof cat === "object" ? cat : {};
+      return Object.assign(
+        {
+          id: celSlug(src.id, "category-" + (i + 1)),
+          hidden: src.hidden === true,
+          image: celImage(src.image),
+          gallery: (Array.isArray(src.gallery) ? src.gallery : []).map(celImage).filter((img) => img.url)
+        },
+        celLangPair(src, ["title", "desc"])
+      );
+    }),
+    why: Object.assign(celLangPair(why, ["eyebrow", "title", "desc"]), {
+      items: (Array.isArray(why.items) ? why.items : []).map((item, i) => {
+        const src = item && typeof item === "object" ? item : {};
+        return Object.assign(
+          { id: celSlug(src.id, "item-" + (i + 1)), icon: celText(src.icon) },
+          celLangPair(src, ["title", "desc"])
+        );
+      })
+    }),
+    cta: celLangPair(doc.cta, ["eyebrow", "title", "desc", "button", "secondaryButton", "whatsappMessage", "note"]),
+    promo: Object.assign(
+      { enabled: promo.enabled !== false, image: celImage(promo.image) },
+      celLangPair(promo, ["eyebrow", "title", "desc", "button"])
+    )
+  };
+}
+
+async function loadCelebrations() {
+  const { data, error } = await sb.from("celebrations_content").select("data").eq("id", 1).maybeSingle();
+  if (error) throw error;
+  return normalizeCelebrations(data ? data.data : null);
+}
+
+async function updateCelebrations(doc) {
+  const { error } = await sb
+    .from("celebrations_content")
+    .upsert({ id: 1, data: normalizeCelebrations(doc), updated_at: new Date().toISOString() }, { onConflict: "id" });
+  if (error) throw error;
+}
+
 /* ---------------- Auth (admin login) ---------------- */
 
 async function adminSignIn(email, password) {
@@ -371,6 +498,7 @@ function subscribeToVillaChanges(onChange) {
     .on("postgres_changes", { event: "*", schema: "public", table: "calendar_days" }, onChange)
     .on("postgres_changes", { event: "*", schema: "public", table: "villa_images" }, onChange)
     .on("postgres_changes", { event: "*", schema: "public", table: "enquiries" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "celebrations_content" }, onChange)
     .subscribe();
   return () => sb.removeChannel(channel);
 }
