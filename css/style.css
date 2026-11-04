@@ -1609,6 +1609,9 @@ html[dir="rtl"] .a11y-widget { font-family: "Assistant", sans-serif; }
   flex-direction: column;
   gap: 2px;
 }
+/* `display: flex` above outranks the browser's [hidden] rule, so the closed
+   state has to be spelled out or the menu is stuck open */
+.a11y-panel[hidden] { display: none; }
 .a11y-panel-title {
   font-weight: 600;
   font-size: 0.9rem;
