@@ -1,0 +1,4 @@
+# The admin panel is linked from every page's footer; keep it out of search.
+User-agent: *
+Disallow: /admin
+Disallow: /admin.html
