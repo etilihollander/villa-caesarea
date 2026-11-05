@@ -14,8 +14,28 @@
     [site, cel] = await Promise.all([loadData(), loadCelebrations()]);
   } catch (err) {
     console.error("Failed to load celebrations content from Supabase", err);
-    document.body.innerHTML =
-      '<p style="padding:4rem;font-family:sans-serif;text-align:center;">Sorry, we could not load this page right now. Please try again shortly.</p>';
+    // Replace only the page body, so the header, nav and footer survive and the
+    // visitor still has a way back to the site. The language choice lives in
+    // localStorage, so we can honour it before any content has loaded.
+    const fallbackLang = localStorage.getItem("villaSiteLang") === "en" ? "en" : "he";
+    const main = document.getElementById("mainContent");
+    if (main) {
+      main.textContent = "";
+      const box = document.createElement("div");
+      box.className = "cel-load-error";
+      const msg = document.createElement("p");
+      msg.textContent =
+        fallbackLang === "he"
+          ? "לא הצלחנו לטעון את תוכן העמוד כרגע. אנא נסו שוב בעוד רגע."
+          : "We could not load this page right now. Please try again shortly.";
+      const back = document.createElement("a");
+      back.className = "btn";
+      back.href = "index.html";
+      back.textContent = fallbackLang === "he" ? "חזרה לעמוד הבית" : "Back to the home page";
+      box.appendChild(msg);
+      box.appendChild(back);
+      main.appendChild(box);
+    }
     return;
   }
 

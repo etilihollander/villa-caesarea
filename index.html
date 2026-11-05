@@ -210,7 +210,10 @@
      managed in the admin panel ("חוגגים בווילה" tab) -->
 <section class="section cel-promo-section" id="celebrationsPromo" hidden>
   <div class="container">
-    <a class="cel-promo" href="celebrations.html">
+    <!-- The card is a plain container, not one giant link: the only link is the
+         button below, stretched over the whole card with CSS. That keeps the
+         heading out of the link text and gives the link a short, clear name. -->
+    <div class="cel-promo">
       <div class="cel-promo-media">
         <img id="celPromoImage" alt="" loading="lazy" hidden>
         <div class="cel-promo-placeholder" id="celPromoPlaceholder" aria-hidden="true"><span class="diamond"></span></div>
@@ -219,9 +222,9 @@
         <span class="eyebrow" id="celPromoEyebrow"></span>
         <h2 id="celPromoTitle"></h2>
         <p id="celPromoDesc"></p>
-        <span class="btn cel-promo-btn" id="celPromoBtn"></span>
+        <a class="btn cel-promo-btn" id="celPromoBtn" href="celebrations.html"></a>
       </div>
-    </a>
+    </div>
   </div>
 </section>
 

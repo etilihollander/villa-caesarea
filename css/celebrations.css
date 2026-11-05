@@ -248,6 +248,7 @@ html[dir="rtl"] .cel-why-card strong { font-family: "David Libre", serif; }
    =================================================================== */
 .cel-promo-section { padding-top: 0; }
 .cel-promo {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: stretch;
@@ -303,6 +304,20 @@ html[dir="rtl"] .cel-why-card strong { font-family: "David Libre", serif; }
   line-height: 1.9;
 }
 .cel-promo-btn { margin-top: 1.6rem; }
+/* The button is the card's only link; this overlay stretches it across the
+   whole card so the card stays clickable without wrapping the heading in a
+   link. No `position` on the button itself, or the overlay would shrink to it. */
+.cel-promo-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+.cel-promo:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 30px rgba(35, 35, 31, 0.07);
+}
+.cel-promo-btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 .cel-promo:hover .cel-promo-btn { background: var(--color-ink); color: var(--color-white); }
 
 /* ---------- Responsive ---------- */
@@ -344,4 +359,18 @@ html.a11y-no-motion .cel-category-photo:hover img { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .cel-category-photo img { transition: none; }
   .cel-category-photo:hover img { transform: none; }
+}
+
+/* Shown only when the content document cannot be loaded at all. */
+.cel-load-error {
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: 7rem 1.5rem 5rem;
+  text-align: center;
+}
+.cel-load-error p {
+  margin: 0 0 1.8rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.7;
 }
