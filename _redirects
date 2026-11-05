@@ -4,3 +4,11 @@
 # (/celebrations?lang=he and /celebrations?lang=en are the hreflang targets;
 # query strings are forwarded automatically).
 /celebrations   /celebrations.html   200
+
+# The admin panel lives at /admin. Netlify's pretty-URL handling already
+# serves admin.html there; stating it here means the address keeps working
+# even if that build setting is ever turned off.
+# Deliberately no 301 from /admin.html back to /admin: combined with the
+# rewrite above that can loop, and the deploy preview is password-protected
+# so it cannot be proven safe before going live. /admin.html stays reachable.
+/admin          /admin.html          200
