@@ -296,6 +296,27 @@
       </div>
 
       <div class="admin-card">
+        <h3>פרטי העסק (לתקנון ולמדיניות הפרטיות)</h3>
+        <div class="settings-note">חוק הגנת הצרכן מחייב עסק המציע שירות לציבור לזהות את עצמו. הפרטים כאן מוצגים אוטומטית בתחתית התקנון ובמדיניות הפרטיות. שדה שנשאר ריק פשוט לא יוצג.</div>
+        <div class="form-grid">
+          <div class="two-col">
+            <div class="field"><label>שם בעל העסק / החברה</label><input type="text" id="f-businessName" placeholder="למשל: ישראל ישראלי"></div>
+            <div class="field"><label>מספר ח.פ. / ע.מ.</label><input type="text" id="f-businessId" placeholder="למשל: 123456789"></div>
+          </div>
+          <div class="field"><label>כתובת העסק</label><input type="text" id="f-businessAddress" placeholder="למשל: הגולף 12, קיסריה"></div>
+          <div class="field">
+            <label>האם המחירים המוצגים באתר כוללים מע"מ?</label>
+            <select id="f-vatIncluded">
+              <option value="true">כן — המחירים כוללים מע"מ</option>
+              <option value="false">לא — המחירים בתוספת מע"מ</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:1rem;" id="saveBusinessBtn">שמירה</button>
+        <span class="save-status" id="businessSaveStatus">נשמר ✓</span>
+      </div>
+
+      <div class="admin-card">
         <h3>חשבון ההתחברות</h3>
         <div class="settings-note">ההתחברות מנוהלת דרך Supabase Auth. כדי להוסיף מנהל נוסף או לשנות אימייל, היכנסו ללוח הבקרה של Supabase (Authentication → Users).</div>
         <div class="form-grid">

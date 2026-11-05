@@ -849,29 +849,46 @@
     $("#f-contactEmail").value = data.contactEmail;
     $("#f-contactPhone").value = data.contactPhone || "";
     $("#f-contactInstagram").value = data.contactInstagram || "";
+    $("#f-businessName").value = data.businessName || "";
+    $("#f-businessId").value = data.businessId || "";
+    $("#f-businessAddress").value = data.businessAddress || "";
+    $("#f-vatIncluded").value = data.vatIncluded === false ? "false" : "true";
     const session = await getAdminSession();
     if (session && session.user) $("#f-adminEmail").value = session.user.email;
   }
 
-  $("#saveSettingsBtn").addEventListener("click", async () => {
-    const btn = $("#saveSettingsBtn");
+  // both settings cards write the same row, so always send every field —
+  // otherwise saving one card would blank out the other card's values
+  function collectSettings() {
+    return {
+      basePrice: Number($("#f-basePrice").value) || data.pricing.basePrice,
+      minNights: Number($("#f-minNights").value) || data.pricing.minNights,
+      contactEmail: $("#f-contactEmail").value || data.contactEmail,
+      contactPhone: $("#f-contactPhone").value.trim(),
+      contactInstagram: $("#f-contactInstagram").value.trim(),
+      businessName: $("#f-businessName").value.trim(),
+      businessId: $("#f-businessId").value.trim(),
+      businessAddress: $("#f-businessAddress").value.trim(),
+      vatIncluded: $("#f-vatIncluded").value !== "false"
+    };
+  }
+
+  async function saveSettingsFrom(btnSel, statusSel) {
+    const btn = $(btnSel);
     btn.disabled = true;
     try {
-      await updateSettings({
-        basePrice: Number($("#f-basePrice").value) || data.pricing.basePrice,
-        minNights: Number($("#f-minNights").value) || data.pricing.minNights,
-        contactEmail: $("#f-contactEmail").value || data.contactEmail,
-        contactPhone: $("#f-contactPhone").value.trim(),
-        contactInstagram: $("#f-contactInstagram").value.trim()
-      });
+      await updateSettings(collectSettings());
       await refreshAllData();
-      flashStatus("#settingsSaveStatus");
+      flashStatus(statusSel);
     } catch (err) {
       alert("שגיאה בשמירה: " + err.message);
     } finally {
       btn.disabled = false;
     }
-  });
+  }
+
+  $("#saveSettingsBtn").addEventListener("click", () => saveSettingsFrom("#saveSettingsBtn", "#settingsSaveStatus"));
+  $("#saveBusinessBtn").addEventListener("click", () => saveSettingsFrom("#saveBusinessBtn", "#businessSaveStatus"));
 
   $("#savePassBtn").addEventListener("click", async () => {
     const p1 = $("#f-newPass").value;

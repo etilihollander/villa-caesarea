@@ -73,7 +73,21 @@
     renderCalendarMonths();
     updateSummary();
     renderContactChannels();
+    renderVatNote();
     hideDecorativeSvgs();
+  }
+
+  // Consumer protection law requires stating whether displayed prices include VAT
+  function renderVatNote() {
+    const el = $("#vatNote");
+    if (!el) return;
+    if (lang === "he") {
+      el.textContent = data.vatIncluded
+        ? 'המחירים כוללים מע"מ.'
+        : 'המחירים אינם כוללים מע"מ, אשר יתווסף לתשלום כדין.';
+    } else {
+      el.textContent = data.vatIncluded ? "Prices include VAT." : "Prices exclude VAT, which will be added as required by law.";
+    }
   }
 
   /* ---------------- Contact channels (phone / email / instagram) ---------------- */
