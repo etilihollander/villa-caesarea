@@ -1,0 +1,376 @@
+/* ===================================================================
+   Villa Gefen — "אירועים חגיגיים בווילה" / Celebrations page
+   Layered on top of css/style.css: tokens, buttons, section rhythm,
+   the diamond dividers and the lightbox all come from the shared sheet.
+   =================================================================== */
+
+/* ---------- Current page marker in the main nav ---------- */
+.main-nav a.is-current {
+  opacity: 1;
+  border-bottom: 1px solid currentColor;
+}
+
+/* ---------- Hero ---------- */
+.cel-hero {
+  position: relative;
+  min-height: min(78vh, 760px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  color: #fff;
+  background: var(--color-ink);
+}
+.cel-hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.cel-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cel-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to top, rgba(18, 17, 14, 0.82) 0%, rgba(18, 17, 14, 0.35) 45%, rgba(18, 17, 14, 0.2) 100%);
+}
+.cel-hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-top: clamp(7rem, 16vw, 11rem);
+  padding-bottom: clamp(2.5rem, 6vw, 4.5rem);
+  max-width: var(--container);
+}
+.cel-hero-content .eyebrow {
+  color: #e6d7c2;
+  display: block;
+  margin-bottom: 0.9rem;
+}
+.cel-hero h1 {
+  color: #fff;
+  font-size: clamp(1.9rem, 4.6vw, 3.4rem);
+  line-height: 1.2;
+  max-width: 18ch;
+}
+html[dir="rtl"] .cel-hero h1 { line-height: 1.35; }
+.cel-hero-intro {
+  margin-top: 1.2rem;
+  max-width: 58ch;
+  font-size: clamp(0.95rem, 1.25vw, 1.08rem);
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* ---------- "Not an event hall" notice ---------- */
+.cel-notice-wrap {
+  background: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-line);
+}
+.cel-notice {
+  margin: 0 auto;
+  padding: clamp(1.1rem, 2.5vw, 1.6rem) 0;
+  max-width: 820px;
+  text-align: center;
+  font-size: clamp(0.84rem, 1.05vw, 0.95rem);
+  line-height: 1.85;
+  color: var(--color-ink-soft);
+}
+.cel-notice:empty { display: none; }
+
+/* ---------- Celebration categories ---------- */
+.cel-categories {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 7vw, 5.5rem);
+}
+.cel-category {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(1.6rem, 4vw, 3.4rem);
+  align-items: center;
+  scroll-margin-top: 90px;
+}
+.cel-category.is-reversed .cel-category-media { order: 2; }
+.cel-category.is-reversed .cel-category-body { order: 1; }
+
+.cel-category-media { min-width: 0; }
+.cel-category-photo {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 10px;
+}
+.cel-category-photo img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform 0.7s ease;
+}
+.cel-category-photo:hover img { transform: scale(1.03); }
+.cel-category-photo:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+
+/* shown until the owner uploads a real photo — deliberately ornamental
+   rather than a stock stand-in */
+.cel-photo-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  border: 1px solid var(--color-line);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(169, 133, 95, 0.09), transparent 62%),
+    var(--color-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cel-photo-placeholder .diamond {
+  width: 12px;
+  height: 12px;
+  background: var(--color-accent);
+  opacity: 0.45;
+  transform: rotate(45deg);
+}
+
+.cel-category-body { min-width: 0; }
+.cel-category-title {
+  font-size: clamp(1.3rem, 2.4vw, 1.85rem);
+  line-height: 1.35;
+}
+.cel-category-body .gallery-category-divider {
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+  margin-top: 0.7rem;
+  max-width: 120px;
+}
+.cel-category-text {
+  margin-top: 1.1rem;
+  color: var(--color-ink-soft);
+  font-size: clamp(0.9rem, 1.1vw, 1rem);
+  line-height: 1.95;
+}
+.cel-category-text p { margin: 0 0 0.9rem; }
+.cel-category-text p:last-child { margin-bottom: 0; }
+
+.cel-gallery {
+  grid-column: 1 / -1;
+  margin-top: clamp(0.8rem, 2vw, 1.4rem);
+}
+
+/* ---------- Why Villa Gefen ---------- */
+.cel-why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.4rem, 3vw, 2.4rem);
+}
+.cel-why-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: clamp(1.4rem, 2.6vw, 1.9rem);
+  text-align: center;
+}
+.cel-why-icon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 0.9rem;
+  color: var(--color-accent-dark);
+}
+.cel-why-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cel-why-card strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+html[dir="rtl"] .cel-why-card strong { font-family: "David Libre", serif; }
+.cel-why-card p {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.85;
+}
+
+/* ---------- Contact CTA ---------- */
+.cel-cta {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+.cel-cta h2 {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  margin-top: 0.7rem;
+}
+.cel-cta-desc {
+  margin-top: 1rem;
+  color: var(--color-ink-soft);
+  font-size: clamp(0.92rem, 1.1vw, 1rem);
+  line-height: 1.9;
+}
+.cel-cta-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.8rem;
+}
+.cel-cta-actions:empty { display: none; }
+.cel-cta-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.cel-cta-note {
+  margin-top: 2rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.8;
+}
+.cel-cta-note:empty { display: none; }
+
+/* ===================================================================
+   Home-page promo teaser (index.html) linking to this page
+   =================================================================== */
+.cel-promo-section { padding-top: 0; }
+.cel-promo {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.cel-promo:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 30px rgba(35, 35, 31, 0.07);
+}
+.cel-promo-media { position: relative; min-height: 240px; }
+.cel-promo-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cel-promo-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(169, 133, 95, 0.12), transparent 65%),
+    #ece5da;
+}
+.cel-promo-placeholder .diamond {
+  width: 12px;
+  height: 12px;
+  background: var(--color-accent);
+  opacity: 0.45;
+  transform: rotate(45deg);
+}
+.cel-promo-body {
+  padding: clamp(1.8rem, 4vw, 3.2rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.cel-promo-body h2 {
+  margin-top: 0.7rem;
+  font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+  line-height: 1.35;
+}
+.cel-promo-body p {
+  margin: 1rem 0 0;
+  color: var(--color-ink-soft);
+  font-size: clamp(0.9rem, 1.1vw, 1rem);
+  line-height: 1.9;
+}
+.cel-promo-btn { margin-top: 1.6rem; }
+/* The button is the card's only link; this overlay stretches it across the
+   whole card so the card stays clickable without wrapping the heading in a
+   link. No `position` on the button itself, or the overlay would shrink to it. */
+.cel-promo-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+.cel-promo:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 30px rgba(35, 35, 31, 0.07);
+}
+.cel-promo-btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.cel-promo:hover .cel-promo-btn { background: var(--color-ink); color: var(--color-white); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .cel-why-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cel-promo { grid-template-columns: 1fr; }
+  .cel-promo-media { min-height: 0; aspect-ratio: 16 / 9; }
+  .cel-promo-body { align-items: center; text-align: center; }
+}
+@media (max-width: 720px) {
+  .cel-hero { min-height: 70vh; }
+  .cel-category {
+    grid-template-columns: 1fr;
+    gap: 1.3rem;
+  }
+  .cel-category.is-reversed .cel-category-media,
+  .cel-category.is-reversed .cel-category-body { order: 0; }
+  .cel-category-photo img,
+  .cel-photo-placeholder { aspect-ratio: 16 / 10; }
+  .cel-category-body .gallery-category-divider { margin-inline: auto; }
+  .cel-category-body { text-align: center; }
+  .cel-why-grid { grid-template-columns: 1fr; }
+  .cel-cta-actions { flex-direction: column; align-items: stretch; }
+  .cel-cta-btn { justify-content: center; }
+}
+
+/* ---------- Accessibility modes (shared widget, Israeli Standard 5568) ---------- */
+html.a11y-contrast .cel-why-card {
+  background: #fff;
+  border-color: #000;
+}
+html.a11y-contrast .cel-notice-wrap,
+html.a11y-contrast .cel-why-section { background: #fff; }
+html.a11y-contrast .cel-hero::after {
+  background: rgba(0, 0, 0, 0.72);
+}
+html.a11y-no-motion .cel-category-photo img { transition: none; }
+html.a11y-no-motion .cel-category-photo:hover img { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cel-category-photo img { transition: none; }
+  .cel-category-photo:hover img { transform: none; }
+}
+
+/* Shown only when the content document cannot be loaded at all. */
+.cel-load-error {
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: 7rem 1.5rem 5rem;
+  text-align: center;
+}
+.cel-load-error p {
+  margin: 0 0 1.8rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}

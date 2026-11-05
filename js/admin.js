@@ -163,7 +163,8 @@
 
   $$(".lang-tabs button[data-content-lang]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      $$(".lang-tabs button").forEach((b) => b.classList.remove("active"));
+      // scoped to this panel's tabs — other panels have their own language tabs
+      $$(".lang-tabs button[data-content-lang]").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       contentLang = btn.dataset.contentLang;
       loadContentForm();
@@ -222,6 +223,629 @@
     el.classList.add("visible");
     setTimeout(() => el.classList.remove("visible"), 1800);
   }
+
+  /* ===================================================================
+     Celebrations panel — full content management for celebrations.html
+     and for the promo teaser on the home page.
+
+     The whole page is one jsonb document (see loadCelebrations in
+     js/data.js). Text inputs write straight into the in-memory document
+     so switching language tabs never loses an edit; the Save button
+     persists it. Image actions persist immediately, because the file is
+     already in Storage by then and the URL must not be lost.
+     =================================================================== */
+  let cel = null;
+  let celLang = "he";
+  let celDirty = false;
+
+  const CEL_ICON_OPTIONS = [
+    { key: "pool", label: "בריכה" },
+    { key: "suite", label: "חדר שינה / סוויטה" },
+    { key: "garden", label: "גינה" },
+    { key: "privacy", label: "פרטיות" },
+    { key: "chef", label: "מטבח / שף" },
+    { key: "view", label: "נוף" },
+    { key: "dining", label: "פינת אוכל" },
+    { key: "toast", label: "הרמת כוסית" },
+    { key: "music", label: "מוזיקה" },
+    { key: "games", label: "משחקים" },
+    { key: "kids", label: "ילדים" },
+    { key: "parking", label: "חניה" },
+    { key: "beach", label: "חוף ים" },
+    { key: "ac", label: "מיזוג" },
+    { key: "wifi", label: "אינטרנט" }
+  ];
+
+  function celNode(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function markCelDirty() {
+    celDirty = true;
+    const note = $("#celDirtyNote");
+    if (note) note.hidden = false;
+  }
+
+  /* A labelled text input / textarea bound live to target[key]. */
+  function celField(labelText, target, key, opts) {
+    const o = opts || {};
+    const field = celNode("div", "field");
+    field.appendChild(celNode("label", null, labelText));
+    const input = document.createElement(o.rows ? "textarea" : "input");
+    if (o.rows) input.rows = o.rows;
+    else input.type = "text";
+    if (o.placeholder) input.placeholder = o.placeholder;
+    input.value = target[key] || "";
+    input.dir = celLang === "he" ? "rtl" : "ltr";
+    input.addEventListener("input", () => {
+      target[key] = input.value;
+      markCelDirty();
+    });
+    field.appendChild(input);
+    if (o.hint) {
+      const hint = celNode("div", "settings-note", o.hint);
+      hint.style.marginTop = "0.4rem";
+      field.appendChild(hint);
+    }
+    return field;
+  }
+
+  function celCard(titleText, descText) {
+    const card = celNode("div", "admin-card");
+    card.appendChild(celNode("h3", null, titleText));
+    if (descText) {
+      const p = celNode("p", "desc", descText);
+      p.style.marginBottom = "1rem";
+      card.appendChild(p);
+    }
+    const grid = celNode("div", "form-grid");
+    card.appendChild(grid);
+    card.body = grid;
+    return card;
+  }
+
+  /* Is this URL still referenced anywhere? Used before deleting a file from
+     Storage, so a photo shared between sections (or taken from the villa
+     gallery) is only unlinked, never destroyed. */
+  function celUrlInUse(url) {
+    if (!url) return true;
+    if (data && data.images && data.images.some((img) => img.file === url)) return true;
+    const used = [cel.hero.image.url, cel.promo.image.url];
+    cel.categories.forEach((cat) => {
+      used.push(cat.image.url);
+      cat.gallery.forEach((img) => used.push(img.url));
+    });
+    return used.indexOf(url) !== -1;
+  }
+
+  async function celReleaseImages(urls) {
+    for (const url of urls || []) {
+      if (!url || celUrlInUse(url)) continue;
+      try {
+        await removeStorageImage(url);
+      } catch (err) {
+        console.warn("Could not remove unused celebration image from storage", err);
+      }
+    }
+  }
+
+  async function persistCel(opts) {
+    const o = opts || {};
+    try {
+      await updateCelebrations(cel);
+      celDirty = false;
+      const note = $("#celDirtyNote");
+      if (note) note.hidden = true;
+      if (o.release) await celReleaseImages(o.release);
+      if (o.rerender) renderCelEditor();
+      flashStatus("#celSaveStatus");
+      return true;
+    } catch (err) {
+      alert("שגיאה בשמירה: " + err.message);
+      console.error(err);
+      return false;
+    }
+  }
+
+  /* ---- a single image slot: preview, upload/replace, pick, remove, alt ---- */
+  function celImageEditor(owner, labelText, hintText) {
+    const wrap = celNode("div", "cel-image-editor");
+    wrap.appendChild(celNode("label", null, labelText));
+
+    const row = celNode("div", "cel-image-row");
+
+    const preview = celNode("div", "cel-image-preview");
+    if (owner.url) {
+      const img = document.createElement("img");
+      img.src = owner.url;
+      img.alt = "";
+      preview.appendChild(img);
+    } else {
+      preview.classList.add("is-empty");
+      preview.appendChild(celNode("span", null, "אין תמונה"));
+    }
+    row.appendChild(preview);
+
+    const actions = celNode("div", "cel-image-actions");
+
+    const fileLabel = celNode("label", "cel-upload-btn", owner.url ? "החלפת תמונה" : "העלאת תמונה");
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.style.display = "none";
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      fileLabel.textContent = "מעלה...";
+      const previousUrl = owner.url;
+      try {
+        owner.url = await uploadImageToStorage(file, "celebrations");
+        await persistCel({ release: [previousUrl], rerender: true });
+      } catch (err) {
+        alert("שגיאה בהעלאת תמונה: " + err.message);
+        console.error(err);
+        renderCelEditor();
+      }
+    });
+    fileLabel.appendChild(fileInput);
+    actions.appendChild(fileLabel);
+
+    // reuse a photo that is already on the site instead of uploading again
+    const picker = document.createElement("select");
+    picker.className = "cel-image-picker";
+    picker.appendChild(new Option("בחירה מתמונות הוילה…", ""));
+    (data && data.images ? data.images : []).forEach((img, i) => {
+      const tag = TAG_OPTIONS.find((o) => o.value === img.tag);
+      picker.appendChild(new Option((tag ? tag.label : "תמונה") + " " + (i + 1), img.file));
+    });
+    picker.addEventListener("change", async () => {
+      if (!picker.value) return;
+      const previousUrl = owner.url;
+      owner.url = picker.value;
+      await persistCel({ release: [previousUrl], rerender: true });
+    });
+    actions.appendChild(picker);
+
+    if (owner.url) {
+      const removeBtn = celNode("button", "cel-danger-btn", "הסרת התמונה");
+      removeBtn.type = "button";
+      removeBtn.addEventListener("click", async () => {
+        if (!confirm("להסיר את התמונה מהקטע הזה?")) return;
+        const previousUrl = owner.url;
+        owner.url = "";
+        await persistCel({ release: [previousUrl], rerender: true });
+      });
+      actions.appendChild(removeBtn);
+    }
+
+    row.appendChild(actions);
+    wrap.appendChild(row);
+
+    wrap.appendChild(
+      celField(
+        celLang === "he" ? "טקסט חלופי לתמונה (alt, עברית)" : "Image alt text (English)",
+        owner.alt,
+        celLang,
+        { placeholder: celLang === "he" ? "למשל: הבריכה הפרטית בווילה גפן" : "e.g. The private pool at Villa Gefen" }
+      )
+    );
+
+    if (hintText) {
+      const hint = celNode("div", "settings-note", hintText);
+      hint.style.marginTop = "0.5rem";
+      wrap.appendChild(hint);
+    }
+    return wrap;
+  }
+
+  /* ---- the gallery of one celebration category ---- */
+  function celGalleryEditor(cat) {
+    const wrap = celNode("div", "cel-gallery-editor");
+    const head = celNode("div", "cel-subhead");
+    head.appendChild(celNode("strong", null, "גלריית תמונות לקטגוריה"));
+    head.appendChild(
+      celNode("span", null, cat.gallery.length ? cat.gallery.length + " תמונות" : "אין תמונות — הגלריה לא תוצג באתר")
+    );
+    wrap.appendChild(head);
+
+    const uploadLabel = celNode("label", "upload-drop cel-gallery-upload");
+    uploadLabel.appendChild(celNode("span", null, "לחצו כדי להעלות תמונות לקטגוריה הזו (אפשר כמה בבת אחת)"));
+    const uploadInput = document.createElement("input");
+    uploadInput.type = "file";
+    uploadInput.accept = "image/*";
+    uploadInput.multiple = true;
+    uploadInput.style.display = "none";
+    uploadInput.addEventListener("change", async () => {
+      const files = Array.from(uploadInput.files || []);
+      if (!files.length) return;
+      const span = uploadLabel.querySelector("span");
+      let failed = 0;
+      for (let i = 0; i < files.length; i++) {
+        span.textContent = `מעלה ${i + 1} מתוך ${files.length}...`;
+        try {
+          const url = await uploadImageToStorage(files[i], "celebrations");
+          cat.gallery.push({ url, alt: { he: "", en: "" } });
+        } catch (err) {
+          failed++;
+          console.error(err);
+        }
+      }
+      await persistCel({ rerender: true });
+      if (failed) alert(failed + " תמונות לא הועלו. נסו שוב.");
+    });
+    uploadLabel.appendChild(uploadInput);
+    wrap.appendChild(uploadLabel);
+
+    if (cat.gallery.length) {
+      const grid = celNode("div", "cel-gallery-grid");
+      cat.gallery.forEach((img, idx) => {
+        const tile = celNode("div", "cel-gallery-tile");
+        const thumb = document.createElement("img");
+        thumb.src = img.url;
+        thumb.alt = "";
+        tile.appendChild(thumb);
+
+        const bar = celNode("div", "cel-tile-bar");
+        const back = celNode("button", null, "◀");
+        back.type = "button";
+        back.title = "הזזה אחורה";
+        back.disabled = idx === 0;
+        back.addEventListener("click", async () => {
+          cat.gallery.splice(idx - 1, 0, cat.gallery.splice(idx, 1)[0]);
+          await persistCel({ rerender: true });
+        });
+        const fwd = celNode("button", null, "▶");
+        fwd.type = "button";
+        fwd.title = "הזזה קדימה";
+        fwd.disabled = idx === cat.gallery.length - 1;
+        fwd.addEventListener("click", async () => {
+          cat.gallery.splice(idx + 1, 0, cat.gallery.splice(idx, 1)[0]);
+          await persistCel({ rerender: true });
+        });
+        const del = celNode("button", "is-danger", "מחיקה");
+        del.type = "button";
+        del.addEventListener("click", async () => {
+          if (!confirm("למחוק את התמונה מהגלריה?")) return;
+          const removed = cat.gallery.splice(idx, 1)[0];
+          await persistCel({ release: [removed.url], rerender: true });
+        });
+        bar.appendChild(back);
+        bar.appendChild(fwd);
+        bar.appendChild(del);
+        tile.appendChild(bar);
+
+        const altInput = document.createElement("input");
+        altInput.type = "text";
+        altInput.className = "cel-tile-alt";
+        altInput.placeholder = celLang === "he" ? "טקסט חלופי (alt)" : "Image alt text";
+        altInput.value = img.alt[celLang] || "";
+        altInput.dir = celLang === "he" ? "rtl" : "ltr";
+        altInput.addEventListener("input", () => {
+          img.alt[celLang] = altInput.value;
+          markCelDirty();
+        });
+        tile.appendChild(altInput);
+
+        grid.appendChild(tile);
+      });
+      wrap.appendChild(grid);
+    }
+
+    return wrap;
+  }
+
+  /* ---- one celebration category ---- */
+  function celCategoryEditor(cat, index) {
+    const card = celNode("div", "admin-card cel-category-card" + (cat.hidden ? " is-hidden-cat" : ""));
+
+    const head = celNode("div", "cel-cat-head");
+    const title = celNode("h3", null, (cat[celLang].title || "קטגוריה ללא שם") + (cat.hidden ? " — מוסתרת" : ""));
+    head.appendChild(title);
+
+    const controls = celNode("div", "cel-cat-controls");
+    const up = celNode("button", null, "▲");
+    up.type = "button";
+    up.title = "העלאה בסדר התצוגה";
+    up.disabled = index === 0;
+    up.addEventListener("click", async () => {
+      cel.categories.splice(index - 1, 0, cel.categories.splice(index, 1)[0]);
+      await persistCel({ rerender: true });
+    });
+    const down = celNode("button", null, "▼");
+    down.type = "button";
+    down.title = "הורדה בסדר התצוגה";
+    down.disabled = index === cel.categories.length - 1;
+    down.addEventListener("click", async () => {
+      cel.categories.splice(index + 1, 0, cel.categories.splice(index, 1)[0]);
+      await persistCel({ rerender: true });
+    });
+    const hide = celNode("button", null, cat.hidden ? "הצגה באתר" : "הסתרה מהאתר");
+    hide.type = "button";
+    hide.addEventListener("click", async () => {
+      cat.hidden = !cat.hidden;
+      await persistCel({ rerender: true });
+    });
+    const del = celNode("button", "is-danger", "מחיקת הקטגוריה");
+    del.type = "button";
+    del.addEventListener("click", async () => {
+      if (!confirm('למחוק את הקטגוריה "' + (cat[celLang].title || cat.id) + '" ואת הגלריה שלה? הפעולה אינה ניתנת לביטול.')) return;
+      const removed = cel.categories.splice(index, 1)[0];
+      const urls = [removed.image.url].concat(removed.gallery.map((img) => img.url));
+      await persistCel({ release: urls, rerender: true });
+    });
+    [up, down, hide, del].forEach((btn) => controls.appendChild(btn));
+    head.appendChild(controls);
+    card.appendChild(head);
+
+    const grid = celNode("div", "form-grid");
+    grid.appendChild(celField("כותרת הקטגוריה", cat[celLang], "title"));
+    grid.appendChild(
+      celField("תיאור", cat[celLang], "desc", {
+        rows: 4,
+        hint: "שורה ריקה כפולה בין פסקאות תיצור פסקה חדשה באתר."
+      })
+    );
+    grid.appendChild(celImageEditor(cat.image, "תמונה ראשית לקטגוריה", "כל עוד לא הועלתה תמונה, האתר מציג מסגרת מעוצבת במקומה — בלי תמונת סטוק."));
+    grid.appendChild(celGalleryEditor(cat));
+    card.appendChild(grid);
+
+    return card;
+  }
+
+  /* ---- the whole panel ---- */
+  function renderCelEditor() {
+    const root = $("#celEditor");
+    if (!root || !cel) return;
+    root.innerHTML = "";
+
+    /* Hero */
+    const hero = celCard("ראש העמוד (Hero)", "התמונה הגדולה, הכותרת ומשפט הפתיחה בראש העמוד.");
+    hero.body.appendChild(celField("כותרת עליונה (Eyebrow)", cel.hero[celLang], "eyebrow"));
+    hero.body.appendChild(celField("כותרת ראשית (H1)", cel.hero[celLang], "title", { rows: 2 }));
+    hero.body.appendChild(celField("משפט פתיחה", cel.hero[celLang], "intro", { rows: 3 }));
+    hero.body.appendChild(
+      celImageEditor(cel.hero.image, "תמונת ראש העמוד", "כל עוד לא נבחרה תמונה, מוצגת תמונת ההירו של עמוד הבית.")
+    );
+    root.appendChild(hero);
+
+    /* Clarifying notice */
+    const notice = celCard("הבהרה למבקרים", 'הפסקה המודגשת מתחת לראש העמוד — למשל שהוילה אינה אולם אירועים.');
+    notice.body.appendChild(celField("טקסט ההבהרה", cel.notice, celLang, { rows: 3 }));
+    root.appendChild(notice);
+
+    /* Categories head */
+    const catHead = celCard("כותרת מקטע הקטגוריות", "הכותרות שמעל רשימת סוגי האירועים.");
+    catHead.body.appendChild(celField("כותרת עליונה (Eyebrow)", cel.categoriesHead[celLang], "eyebrow"));
+    catHead.body.appendChild(celField("כותרת", cel.categoriesHead[celLang], "title"));
+    catHead.body.appendChild(celField("תיאור", cel.categoriesHead[celLang], "desc", { rows: 2 }));
+    root.appendChild(catHead);
+
+    /* Categories */
+    const catsHead = celNode("div", "cel-section-head");
+    catsHead.appendChild(celNode("h3", null, "קטגוריות החגיגות"));
+    catsHead.appendChild(
+      celNode("p", "desc", "סדר הכרטיסים כאן הוא הסדר באתר. אפשר להוסיף קטגוריות חדשות, להסתיר קטגוריה בלי למחוק אותה, ולנהל גלריה נפרדת לכל אחת.")
+    );
+    root.appendChild(catsHead);
+
+    if (!cel.categories.length) {
+      root.appendChild(celNode("div", "settings-note", "אין קטגוריות. הוסיפו קטגוריה ראשונה בכפתור שלמטה."));
+    }
+    cel.categories.forEach((cat, i) => root.appendChild(celCategoryEditor(cat, i)));
+
+    const addCat = celNode("button", "add-amenity-btn", "+ הוספת קטגוריית חגיגה");
+    addCat.type = "button";
+    addCat.addEventListener("click", async () => {
+      cel.categories.push({
+        id: "category-" + Date.now().toString(36),
+        hidden: true,
+        image: { url: "", alt: { he: "", en: "" } },
+        gallery: [],
+        he: { title: "קטגוריה חדשה", desc: "" },
+        en: { title: "New category", desc: "" }
+      });
+      await persistCel({ rerender: true });
+    });
+    root.appendChild(addCat);
+
+    /* Why Villa Gefen */
+    const why = celCard("למה וילה גפן", "המקטע שמדגיש את מה שהוילה מציעה לאירוע.");
+    why.body.appendChild(celField("כותרת עליונה (Eyebrow)", cel.why[celLang], "eyebrow"));
+    why.body.appendChild(celField("כותרת", cel.why[celLang], "title"));
+    why.body.appendChild(celField("תיאור", cel.why[celLang], "desc", { rows: 2 }));
+
+    const items = celNode("div", "cel-why-items");
+    cel.why.items.forEach((item, idx) => {
+      const row = celNode("div", "cel-why-row");
+
+      const iconSelect = document.createElement("select");
+      iconSelect.appendChild(new Option("ללא אייקון", ""));
+      CEL_ICON_OPTIONS.forEach((opt) => {
+        const option = new Option(opt.label, opt.key);
+        if (opt.key === item.icon) option.selected = true;
+        iconSelect.appendChild(option);
+      });
+      iconSelect.addEventListener("change", () => {
+        item.icon = iconSelect.value;
+        markCelDirty();
+      });
+      row.appendChild(iconSelect);
+
+      const fields = celNode("div", "cel-why-fields");
+      const titleInput = document.createElement("input");
+      titleInput.type = "text";
+      titleInput.placeholder = celLang === "he" ? "כותרת" : "Title";
+      titleInput.value = item[celLang].title || "";
+      titleInput.dir = celLang === "he" ? "rtl" : "ltr";
+      titleInput.addEventListener("input", () => {
+        item[celLang].title = titleInput.value;
+        markCelDirty();
+      });
+      const descInput = document.createElement("textarea");
+      descInput.rows = 2;
+      descInput.placeholder = celLang === "he" ? "תיאור" : "Description";
+      descInput.value = item[celLang].desc || "";
+      descInput.dir = celLang === "he" ? "rtl" : "ltr";
+      descInput.addEventListener("input", () => {
+        item[celLang].desc = descInput.value;
+        markCelDirty();
+      });
+      fields.appendChild(titleInput);
+      fields.appendChild(descInput);
+      row.appendChild(fields);
+
+      const ctrls = celNode("div", "cel-why-controls");
+      const up = celNode("button", null, "▲");
+      up.type = "button";
+      up.disabled = idx === 0;
+      up.addEventListener("click", async () => {
+        cel.why.items.splice(idx - 1, 0, cel.why.items.splice(idx, 1)[0]);
+        await persistCel({ rerender: true });
+      });
+      const down = celNode("button", null, "▼");
+      down.type = "button";
+      down.disabled = idx === cel.why.items.length - 1;
+      down.addEventListener("click", async () => {
+        cel.why.items.splice(idx + 1, 0, cel.why.items.splice(idx, 1)[0]);
+        await persistCel({ rerender: true });
+      });
+      const remove = celNode("button", "is-danger", "×");
+      remove.type = "button";
+      remove.title = "הסרה";
+      remove.addEventListener("click", async () => {
+        cel.why.items.splice(idx, 1);
+        await persistCel({ rerender: true });
+      });
+      [up, down, remove].forEach((b) => ctrls.appendChild(b));
+      row.appendChild(ctrls);
+
+      items.appendChild(row);
+    });
+    why.body.appendChild(items);
+
+    const addWhy = celNode("button", "add-amenity-btn", "+ הוספת יתרון");
+    addWhy.type = "button";
+    addWhy.addEventListener("click", async () => {
+      cel.why.items.push({
+        id: "item-" + Date.now().toString(36),
+        icon: "",
+        he: { title: "", desc: "" },
+        en: { title: "", desc: "" }
+      });
+      await persistCel({ rerender: true });
+    });
+    why.body.appendChild(addWhy);
+    root.appendChild(why);
+
+    /* Contact CTA */
+    const cta = celCard("קריאה לפעולה — יצירת קשר", "המקטע שבתחתית העמוד, כולל כפתור הוואטסאפ והערת התיאום מראש.");
+    cta.body.appendChild(celField("כותרת עליונה (Eyebrow)", cel.cta[celLang], "eyebrow"));
+    cta.body.appendChild(celField("כותרת", cel.cta[celLang], "title"));
+    cta.body.appendChild(celField("תיאור", cel.cta[celLang], "desc", { rows: 2 }));
+    cta.body.appendChild(
+      celField("טקסט כפתור הוואטסאפ", cel.cta[celLang], "button", {
+        hint: "הכפתור מוצג רק אם הוגדר מספר טלפון בלשונית ההגדרות, והוא מפנה ל-WhatsApp של אותו מספר."
+      })
+    );
+    cta.body.appendChild(
+      celField("הודעה מוכנה לוואטסאפ", cel.cta[celLang], "whatsappMessage", {
+        rows: 2,
+        hint: "הטקסט שיופיע כבר מוקלד בשיחה שהמבקר פותח."
+      })
+    );
+    cta.body.appendChild(
+      celField("טקסט כפתור משני", cel.cta[celLang], "secondaryButton", {
+        hint: "מפנה לטופס הפנייה בעמוד הבית. השאירו ריק כדי להסתיר את הכפתור."
+      })
+    );
+    cta.body.appendChild(
+      celField("הערת תיאום מראש ואישור", cel.cta[celLang], "note", {
+        rows: 3,
+        hint: "מוצגת בתחתית המקטע בטקסט קטן."
+      })
+    );
+    root.appendChild(cta);
+
+    /* Home-page promo */
+    const promo = celCard("קטע קידום בעמוד הבית", "הכרטיס שמופיע בעמוד הבית ומוביל לעמוד החגיגות.");
+    const toggle = celNode("div", "field");
+    const toggleLabel = celNode("label", null, "הצגת הקטע בעמוד הבית");
+    const toggleSelect = document.createElement("select");
+    toggleSelect.appendChild(new Option("כן — הקטע מוצג", "true"));
+    toggleSelect.appendChild(new Option("לא — הקטע מוסתר", "false"));
+    toggleSelect.value = cel.promo.enabled ? "true" : "false";
+    toggleSelect.addEventListener("change", () => {
+      cel.promo.enabled = toggleSelect.value === "true";
+      markCelDirty();
+    });
+    toggle.appendChild(toggleLabel);
+    toggle.appendChild(toggleSelect);
+    promo.body.appendChild(toggle);
+    promo.body.appendChild(celField("כותרת עליונה (Eyebrow)", cel.promo[celLang], "eyebrow"));
+    promo.body.appendChild(celField("כותרת", cel.promo[celLang], "title"));
+    promo.body.appendChild(celField("תיאור", cel.promo[celLang], "desc", { rows: 2 }));
+    promo.body.appendChild(celField("טקסט הכפתור", cel.promo[celLang], "button"));
+    promo.body.appendChild(celImageEditor(cel.promo.image, "תמונת הקטע", "כל עוד לא נבחרה תמונה, מוצגת מסגרת מעוצבת."));
+    root.appendChild(promo);
+
+    /* Nav label + SEO */
+    const meta = celCard("ניווט וקידום בגוגל (SEO)", "שם הפריט בתפריט האתר, וכותרת/תיאור העמוד במנועי החיפוש.");
+    meta.body.appendChild(
+      celField("שם הפריט בתפריט", cel.nav, celLang, { hint: "מוצג בתפריט הראשי בעמוד הבית ובעמוד החגיגות." })
+    );
+    meta.body.appendChild(
+      celField("כותרת העמוד (Title)", cel.seo[celLang], "title", { hint: "מומלץ עד 60 תווים." })
+    );
+    meta.body.appendChild(
+      celField("תיאור העמוד (Meta description)", cel.seo[celLang], "description", {
+        rows: 3,
+        hint: "מומלץ 120–160 תווים."
+      })
+    );
+    root.appendChild(meta);
+  }
+
+  /* Reloads from Supabase, but never over unsaved text edits. */
+  async function loadCelPanel() {
+    if (cel && celDirty) {
+      renderCelEditor();
+      return;
+    }
+    cel = await loadCelebrations();
+    renderCelEditor();
+  }
+
+  $$(".lang-tabs button[data-cel-lang]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      $$(".lang-tabs button[data-cel-lang]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      celLang = btn.dataset.celLang;
+      renderCelEditor();
+    });
+  });
+
+  $("#saveCelBtn").addEventListener("click", async () => {
+    const btn = $("#saveCelBtn");
+    btn.disabled = true;
+    try {
+      await persistCel();
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // "unsaved changes" marker next to the save button
+  (function addCelDirtyNote() {
+    const bar = $("#panel-celebrations .save-bar");
+    if (!bar) return;
+    const note = celNode("span", "cel-dirty-note", "יש שינויי טקסט שלא נשמרו");
+    note.id = "celDirtyNote";
+    note.hidden = true;
+    bar.appendChild(note);
+  })();
 
   /* ---------------- Images panel ---------------- */
   const TAG_OPTIONS = [
@@ -929,6 +1553,17 @@
       sidebarInit = true;
     }
     loadContentForm();
+    // a problem on the celebrations page must not block the rest of the panel
+    try {
+      await loadCelPanel();
+    } catch (err) {
+      console.error("Failed to load celebrations content", err);
+      const root = $("#celEditor");
+      if (root && !root.children.length) {
+        root.innerHTML =
+          '<div class="settings-note">לא ניתן לטעון את תוכן עמוד החגיגות. רעננו את העמוד, ואם הבעיה חוזרת ודאו שטבלת celebrations_content קיימת ב-Supabase.</div>';
+      }
+    }
     renderImages();
     renderMiniCalendars();
     updateRangeSummary();

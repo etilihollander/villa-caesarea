@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=David+Libre:wght@400;500;700&family=Jost:wght@300;400;500&family=Assistant:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/celebrations.css">
 </head>
 <body>
 
@@ -20,6 +21,7 @@
     <a href="#about" data-i18n="navAbout">The Villa</a>
     <a href="#gallery" data-i18n="navGallery">Gallery</a>
     <a href="#amenities" data-i18n="navAmenities">Amenities</a>
+    <a href="celebrations.html" id="navCelebrations" hidden>חוגגים בווילה</a>
     <a href="#availability" data-i18n="navAvailability">Availability</a>
     <a href="#contact" data-i18n="navContact">Enquire</a>
     <div class="lang-toggle" id="langToggleMobile">
@@ -201,6 +203,28 @@
       <h2 data-i18n="amenitiesSubtitle">Everything the villa has to offer</h2>
     </div>
     <div class="amenities-grid" id="amenitiesGrid"></div>
+  </div>
+</section>
+
+<!-- Promotional teaser for the celebrations page — content & visibility are
+     managed in the admin panel ("חוגגים בווילה" tab) -->
+<section class="section cel-promo-section" id="celebrationsPromo" hidden>
+  <div class="container">
+    <!-- The card is a plain container, not one giant link: the only link is the
+         button below, stretched over the whole card with CSS. That keeps the
+         heading out of the link text and gives the link a short, clear name. -->
+    <div class="cel-promo">
+      <div class="cel-promo-media">
+        <img id="celPromoImage" alt="" loading="lazy" hidden>
+        <div class="cel-promo-placeholder" id="celPromoPlaceholder" aria-hidden="true"><span class="diamond"></span></div>
+      </div>
+      <div class="cel-promo-body">
+        <span class="eyebrow" id="celPromoEyebrow"></span>
+        <h2 id="celPromoTitle"></h2>
+        <p id="celPromoDesc"></p>
+        <a class="btn cel-promo-btn" id="celPromoBtn" href="celebrations.html"></a>
+      </div>
+    </div>
   </div>
 </section>
 
