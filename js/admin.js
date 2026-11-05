@@ -847,6 +847,10 @@
     $("#f-basePrice").value = data.pricing.basePrice;
     $("#f-minNights").value = data.pricing.minNights;
     $("#f-contactEmail").value = data.contactEmail;
+    $("#f-guestsIncluded").value = data.pricing.guestsIncluded || "";
+    $("#f-extraGuestFee").value = data.pricing.extraGuestFee || 0;
+    $("#f-checkinTime").value = data.checkinTime || "";
+    $("#f-checkoutTime").value = data.checkoutTime || "";
     $("#f-contactPhone").value = data.contactPhone || "";
     $("#f-contactInstagram").value = data.contactInstagram || "";
     $("#f-businessName").value = data.businessName || "";
@@ -866,6 +870,10 @@
       contactEmail: $("#f-contactEmail").value || data.contactEmail,
       contactPhone: $("#f-contactPhone").value.trim(),
       contactInstagram: $("#f-contactInstagram").value.trim(),
+      guestsIncluded: Number($("#f-guestsIncluded").value) || 0,
+      extraGuestFee: Number($("#f-extraGuestFee").value) || 0,
+      checkinTime: $("#f-checkinTime").value,
+      checkoutTime: $("#f-checkoutTime").value,
       businessName: $("#f-businessName").value.trim(),
       businessId: $("#f-businessId").value.trim(),
       businessAddress: $("#f-businessAddress").value.trim(),

@@ -558,7 +558,10 @@
     const totalEl = $("#summaryTotal");
     const nightsEl = $("#summaryNights");
     const stayTotalDiv = $("#stayTotal");
-    const disclaimer = $(".stay-disclaimer");
+    const breakdownEl = $("#stayBreakdown");
+    const disclaimers = $$(".stay-disclaimer");
+
+    renderStayTimes();
 
     if (selection.checkin) $("#formCheckin").value = selection.checkin;
     if (selection.checkout) $("#formCheckout").value = selection.checkout;
@@ -567,28 +570,72 @@
 
     if (!selection.checkin || !selection.checkout) {
       stayTotalDiv.style.display = "none";
+      if (breakdownEl) breakdownEl.innerHTML = "";
       hint.textContent = t("selectDatesPrompt");
       hint.style.display = "block";
-      if (disclaimer) disclaimer.style.display = "none";
+      disclaimers.forEach((el) => (el.style.display = "none"));
       return;
     }
 
     let cursor = new Date(selection.checkin);
     const end = new Date(selection.checkout);
-    let total = 0;
+    let nightsTotal = 0;
     let nights = 0;
     while (cursor < end) {
       const info = getDayInfo(data, fmtDateKey(cursor));
-      total += info.price;
+      nightsTotal += info.price;
       nights++;
       cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // base price covers guestsIncluded; every guest beyond that adds a
+    // per-night surcharge for each night of the stay
+    const included = data.pricing.guestsIncluded;
+    const fee = data.pricing.extraGuestFee;
+    const extraGuests = included > 0 && fee > 0 ? Math.max(0, guestCount - included) : 0;
+    const extraTotal = extraGuests * fee * nights;
+    const total = nightsTotal + extraTotal;
+
+    if (breakdownEl) {
+      if (extraGuests > 0) {
+        const baseLabel =
+          lang === "he"
+            ? `${nights} ${t("nightsUnit")} (עד ${included} אורחים)`
+            : `${nights} ${t("nightsUnit")} (up to ${included} guests)`;
+        const extraLabel =
+          lang === "he"
+            ? `${extraGuests} ${extraGuests === 1 ? "אורח נוסף" : "אורחים נוספים"} × ${fmtMoney(fee)} × ${nights} ${t("nightsUnit")}`
+            : `${extraGuests} extra ${extraGuests === 1 ? "guest" : "guests"} × ${fmtMoney(fee)} × ${nights} ${t("nightsUnit")}`;
+        breakdownEl.innerHTML =
+          `<div class="stay-breakdown-row"><span>${baseLabel}</span><span>${fmtMoney(nightsTotal)}</span></div>` +
+          `<div class="stay-breakdown-row"><span>${extraLabel}</span><span>${fmtMoney(extraTotal)}</span></div>`;
+      } else {
+        breakdownEl.innerHTML = "";
+      }
     }
 
     nightsEl.textContent = `${nights} ${t("nightsUnit")}`;
     totalEl.textContent = fmtMoney(total);
     stayTotalDiv.style.display = "flex";
-    if (disclaimer) disclaimer.style.display = "block";
+    disclaimers.forEach((el) => (el.style.display = "block"));
     hint.style.display = "none";
+  }
+
+  function renderStayTimes() {
+    const el = $("#stayTimes");
+    if (!el) return;
+    const ci = data.checkinTime;
+    const co = data.checkoutTime;
+    if (!ci && !co) {
+      el.textContent = "";
+      el.style.display = "none";
+      return;
+    }
+    const parts = [];
+    if (ci) parts.push((lang === "he" ? "כניסה מ-" : "Check-in from ") + ci);
+    if (co) parts.push((lang === "he" ? "יציאה עד " : "Check-out by ") + co);
+    el.textContent = parts.join(" · ");
+    el.style.display = "block";
   }
 
   $("#calPrev").addEventListener("click", () => {
@@ -609,21 +656,19 @@
   });
 
   /* ---------------- Guest counter ---------------- */
+  function setGuestCount(n) {
+    guestCount = n;
+    $("#guestCount").textContent = guestCount;
+    const gf = $('input[name="guests"]');
+    if (gf) gf.value = guestCount;
+    updateSummary(); // the extra-guest surcharge depends on this
+  }
+
   $("#guestMinus").addEventListener("click", () => {
-    if (guestCount > 1) {
-      guestCount--;
-      $("#guestCount").textContent = guestCount;
-      const gf = $('input[name="guests"]');
-      if (gf) gf.value = guestCount;
-    }
+    if (guestCount > 1) setGuestCount(guestCount - 1);
   });
   $("#guestPlus").addEventListener("click", () => {
-    if (guestCount < 20) {
-      guestCount++;
-      $("#guestCount").textContent = guestCount;
-      const gf = $('input[name="guests"]');
-      if (gf) gf.value = guestCount;
-    }
+    if (guestCount < 20) setGuestCount(guestCount + 1);
   });
 
   /* ---------------- Contact form — pre-fill from availability ---------------- */

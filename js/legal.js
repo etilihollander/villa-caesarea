@@ -151,6 +151,18 @@
         : 'המחירים המוצגים באתר אינם כוללים מע"מ, אשר יתווסף לתשלום כדין.';
     }
 
+    // spell out the actual times once the owner has set them
+    const timesLine = $("#checkinTimesLine");
+    if (timesLine && (info.checkinTime || info.checkoutTime)) {
+      const parts = [];
+      if (info.checkinTime) parts.push("הכניסה לוילה מהשעה " + info.checkinTime);
+      if (info.checkoutTime) parts.push("היציאה עד השעה " + info.checkoutTime);
+      timesLine.innerHTML =
+        "<strong>שעות כניסה ויציאה:</strong> " +
+        parts.join(", ") +
+        ". שינוי בשעות מותנה בתיאום מראש, ואיחור ביציאה עלול לחייב בתשלום נוסף.";
+    }
+
     if (box) {
       const rows = [];
       if (info.businessName) rows.push(["שם בעל העסק", info.businessName]);
