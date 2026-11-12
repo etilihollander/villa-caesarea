@@ -87,6 +87,12 @@ html[dir="rtl"] .cel-hero h1 { line-height: 1.35; }
   flex-direction: column;
   gap: clamp(3rem, 7vw, 5.5rem);
 }
+/* A hairline between blocks, so each category's photos read as belonging to
+   the category above them rather than floating between two. */
+.cel-category + .cel-category {
+  border-top: 1px solid var(--color-line);
+  padding-top: clamp(3rem, 7vw, 5.5rem);
+}
 .cel-category {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
@@ -159,9 +165,100 @@ html[dir="rtl"] .cel-hero h1 { line-height: 1.35; }
 .cel-category-text p { margin: 0 0 0.9rem; }
 .cel-category-text p:last-child { margin-bottom: 0; }
 
-.cel-gallery {
+/* ---------- Per-category photo strip ----------
+   Each category's photos live in their own strip, three across. With more
+   than three the strip scrolls a page at a time instead of wrapping and
+   leaving a stray photo on a second row, which read as belonging to the
+   category below it. */
+.cel-gallery-wrap {
   grid-column: 1 / -1;
+  position: relative;
   margin-top: clamp(0.8rem, 2vw, 1.4rem);
+  /* A reversed block orders its media and body 2 and 1, which would leave the
+     strip on 0 and float it above the heading — the photos then read as
+     belonging to the category above. Keep it last in every block. */
+  order: 3;
+}
+.cel-gallery-track {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Deliberately no `scroll-behavior: smooth` here. The arrows pass a
+     behaviour to scrollIntoView, and a CSS value would win over the
+     "instant" that a visitor who asked for no motion should get. */
+  scrollbar-width: none;            /* the arrows are the control */
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;   /* don't trigger back-navigation swipes */
+}
+.cel-gallery-track::-webkit-scrollbar { display: none; }
+/* Four or more: lock each photo to a third so exactly three show per page. */
+.cel-gallery-track.is-paged {
+  grid-auto-columns: calc((100% - 0.9rem) / 3);
+}
+.cel-gallery-slide {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+.cel-gallery-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.4s ease;
+  pointer-events: none;
+}
+.cel-gallery-slide:hover::after { background: rgba(0, 0, 0, 0.05); }
+.cel-gallery-slide img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s ease;
+}
+.cel-gallery-slide:hover img { transform: scale(1.02); }
+.cel-gallery-slide:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.cel-gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-ink);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(35, 35, 31, 0.12);
+  transition: background 0.25s ease, color 0.25s ease, opacity 0.25s ease;
+  z-index: 2;
+}
+.cel-gallery-arrow:hover:not(:disabled) {
+  background: var(--color-ink);
+  color: var(--color-white);
+}
+.cel-gallery-arrow:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.cel-gallery-arrow:disabled { opacity: 0.3; cursor: default; }
+/* Logical insets so the pair swaps sides with the script direction. */
+.cel-gallery-arrow.is-prev { inset-inline-start: -14px; }
+.cel-gallery-arrow.is-next { inset-inline-end: -14px; }
+@media (max-width: 1180px) {
+  .cel-gallery-arrow.is-prev { inset-inline-start: 6px; }
+  .cel-gallery-arrow.is-next { inset-inline-end: 6px; }
 }
 
 /* ---------- Why Villa Gefen ---------- */
@@ -323,12 +420,17 @@ html[dir="rtl"] .cel-why-card strong { font-family: "David Libre", serif; }
 /* ---------- Responsive ---------- */
 @media (max-width: 980px) {
   .cel-why-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Three across gets too small here; the paging step follows the CSS. */
+  .cel-gallery-track.is-paged { grid-auto-columns: calc((100% - 0.45rem) / 2); }
   .cel-promo { grid-template-columns: 1fr; }
   .cel-promo-media { min-height: 0; aspect-ratio: 16 / 9; }
   .cel-promo-body { align-items: center; text-align: center; }
 }
 @media (max-width: 720px) {
   .cel-hero { min-height: 70vh; }
+  /* A sliver of the next photo showing is what tells a phone user to swipe. */
+  .cel-gallery-track.is-paged { grid-auto-columns: 78%; }
+  .cel-gallery-arrow { width: 34px; height: 34px; }
   .cel-category {
     grid-template-columns: 1fr;
     gap: 1.3rem;
@@ -356,9 +458,15 @@ html.a11y-contrast .cel-hero::after {
 }
 html.a11y-no-motion .cel-category-photo img { transition: none; }
 html.a11y-no-motion .cel-category-photo:hover img { transform: none; }
+html.a11y-no-motion .cel-gallery-slide img { transition: none; }
+html.a11y-no-motion .cel-gallery-slide:hover img { transform: none; }
+html.a11y-no-motion .cel-gallery-track { scroll-behavior: auto; }
 @media (prefers-reduced-motion: reduce) {
   .cel-category-photo img { transition: none; }
   .cel-category-photo:hover img { transform: none; }
+  .cel-gallery-slide img { transition: none; }
+  .cel-gallery-slide:hover img { transform: none; }
+  .cel-gallery-track { scroll-behavior: auto; }
 }
 
 /* Shown only when the content document cannot be loaded at all. */
