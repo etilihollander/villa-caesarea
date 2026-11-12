@@ -280,36 +280,180 @@
       block.appendChild(body);
 
       if (cat.gallery.length) {
-        const gallery = document.createElement("div");
-        gallery.className = "gallery-category-images cel-gallery";
-        const offset = cat.image.url ? 1 : 0;
-        cat.gallery.forEach((img, idx) => {
-          const fig = document.createElement("figure");
-          const im = document.createElement("img");
-          im.src = img.url;
-          im.alt = imageAlt(img, title + " " + (idx + 1));
-          im.loading = "lazy";
-          fig.appendChild(im);
-          fig.tabIndex = 0;
-          fig.setAttribute("role", "button");
-          fig.setAttribute(
-            "aria-label",
-            title + " " + (idx + 1) + "/" + cat.gallery.length + (lang === "he" ? " — הצגה מוגדלת" : " — view larger")
-          );
-          fig.addEventListener("click", () => openLightbox(cat, idx + offset));
-          fig.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              openLightbox(cat, idx + offset);
-            }
-          });
-          gallery.appendChild(fig);
-        });
-        block.appendChild(gallery);
+        block.appendChild(buildGallery(cat, title));
       }
 
       wrap.appendChild(block);
     });
+  }
+
+  /* ---------------- Per-category gallery ----------------
+     Each category owns its own photos, so each gets its own strip. Up to
+     PER_PAGE fit across; beyond that the strip scrolls a page at a time with
+     arrows, rather than wrapping and leaving a stray photo on a second row
+     that reads as belonging to the category below.
+
+     PER_PAGE only decides whether the strip pages at all. How many photos are
+     actually visible is the stylesheet's call, and it narrows on small
+     screens, so the paging step is measured from the rendered photos. */
+  const PER_PAGE = 3;
+
+  function prefersNoMotion() {
+    return (
+      document.documentElement.classList.contains("a11y-no-motion") ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  function buildGallery(cat, title) {
+    const total = cat.gallery.length;
+    const offset = cat.image.url ? 1 : 0;
+    const pages = Math.ceil(total / PER_PAGE);
+
+    const wrap = document.createElement("div");
+    wrap.className = "cel-gallery-wrap";
+
+    const track = document.createElement("div");
+    track.className = "cel-gallery-track";
+    // With PER_PAGE or fewer the photos simply share the width; past that they
+    // are locked to a third each so exactly three are visible per page.
+    if (total <= PER_PAGE) track.style.gridTemplateColumns = "repeat(" + total + ", minmax(0, 1fr))";
+    else track.classList.add("is-paged");
+
+    cat.gallery.forEach((img, idx) => {
+      const fig = document.createElement("figure");
+      fig.className = "cel-gallery-slide";
+      const im = document.createElement("img");
+      im.src = img.url;
+      im.alt = imageAlt(img, title + " " + (idx + 1));
+      im.loading = "lazy";
+      fig.appendChild(im);
+      fig.tabIndex = 0;
+      fig.setAttribute("role", "button");
+      fig.setAttribute(
+        "aria-label",
+        title + " " + (idx + 1) + "/" + total + (lang === "he" ? " — הצגה מוגדלת" : " — view larger")
+      );
+      const open = () => openLightbox(cat, idx + offset);
+      fig.addEventListener("click", open);
+      fig.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      });
+      track.appendChild(fig);
+    });
+
+    wrap.appendChild(track);
+    if (pages > 1) addGalleryArrows(wrap, track, title);
+    return wrap;
+  }
+
+  function addGalleryArrows(wrap, track, title) {
+    wrap.classList.add("has-arrows");
+
+    const mk = (kind) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "cel-gallery-arrow is-" + kind;
+      const he = kind === "prev" ? "התמונות הקודמות" : "התמונות הבאות";
+      const en = kind === "prev" ? "Previous photos" : "Next photos";
+      b.setAttribute("aria-label", (lang === "he" ? he : en) + " — " + title);
+      // The chevron points the way the viewer travels, which flips with the script.
+      const forward = (kind === "next") === (lang !== "he");
+      b.innerHTML =
+        '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<polyline points="' + (forward ? "9 18 15 12 9 6" : "15 18 9 12 15 6") + '"></polyline></svg>';
+      return b;
+    };
+
+    const prev = mk("prev");
+    const next = mk("next");
+
+    // A right-to-left strip runs scrollLeft from 0 down to -max. Distance is
+    // therefore tracked as a positive number and the sign is reapplied only
+    // when a value is handed to the element.
+    // Read the direction lazily: the track is still detached while this runs,
+    // and getComputedStyle on a detached element reports the default "ltr".
+    const isRtl = () => getComputedStyle(track).direction === "rtl";
+    const maxScroll = () => track.scrollWidth - track.clientWidth;
+    const travelled = () => Math.abs(track.scrollLeft);
+
+    const sync = () => {
+      const max = maxScroll();
+      const at = travelled();
+      prev.disabled = at <= 2;
+      next.disabled = at >= max - 2;
+    };
+
+    // Distance from one photo to the next, and how many fit, so a page lands
+    // exactly on a photo edge and scroll snapping has nothing to correct.
+    const pitch = () => {
+      const slides = track.children;
+      if (!slides.length) return track.clientWidth;
+      const first = slides[0].getBoundingClientRect();
+      if (slides.length > 1) {
+        const second = slides[1].getBoundingClientRect();
+        const p = Math.abs(second.left - first.left);
+        if (p > 1) return p;
+      }
+      return first.width || track.clientWidth;
+    };
+
+    // Chromium silently ignores a smooth scroll to a negative offset, which is
+    // every scroll in a right-to-left strip, so the tween is done by hand
+    // rather than handed to scrollTo.
+    const DURATION = 380;
+    let frame = null;
+    let settle = null;
+    const glide = (to) => {
+      if (frame) cancelAnimationFrame(frame);
+      if (settle) clearTimeout(settle);
+      const signed = isRtl() ? -to : to;
+      const land = () => {
+        if (frame) cancelAnimationFrame(frame);
+        frame = null;
+        track.scrollLeft = signed;
+        sync();
+      };
+      if (prefersNoMotion()) return land();
+
+      const from = track.scrollLeft;
+      const delta = signed - from;
+      if (Math.abs(delta) < 1) return;
+      const started = performance.now();
+      const tick = (now) => {
+        const t = Math.min(1, (now - started) / DURATION);
+        track.scrollLeft = from + delta * (1 - Math.pow(1 - t, 3));
+        sync();
+        frame = t < 1 ? requestAnimationFrame(tick) : null;
+      };
+      frame = requestAnimationFrame(tick);
+      // Animation frames are paused whenever the page is not being painted —
+      // a background tab, a hidden panel. Landing on the target regardless
+      // keeps the arrows working instead of appearing dead.
+      settle = setTimeout(land, DURATION + 120);
+    };
+
+    const step = (dir) => {
+      const p = pitch();
+      const perPage = Math.max(1, Math.round(track.clientWidth / p));
+      glide(Math.max(0, Math.min(travelled() + dir * perPage * p, maxScroll())));
+    };
+
+    prev.addEventListener("click", () => step(-1));
+    next.addEventListener("click", () => step(1));
+
+    // The strip can also be swiped or trackpad-scrolled, so the disabled state
+    // is read from where it actually sits rather than from a page counter.
+    track.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    setTimeout(sync, 0);
+
+    wrap.appendChild(prev);
+    wrap.appendChild(next);
   }
 
   /* ---------------- Lightbox ---------------- */
