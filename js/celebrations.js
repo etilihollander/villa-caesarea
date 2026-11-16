@@ -46,7 +46,10 @@
   // ?lang=he / ?lang=en lets each language be linked to directly (hreflang),
   // otherwise we follow the choice the visitor already made on the site.
   const urlLang = new URLSearchParams(location.search).get("lang");
-  let lang = urlLang || localStorage.getItem("villaSiteLang") || (navigator.language || "he").slice(0, 2);
+  // Hebrew by default, matching the rest of the site: falling back to the
+  // browser's language sent en-US visitors — a crawler among them — to the
+  // English view of a page whose canonical is the Hebrew one.
+  let lang = urlLang || localStorage.getItem("villaSiteLang") || "he";
   if (lang !== "en" && lang !== "he") lang = "he";
   if (urlLang === "he" || urlLang === "en") localStorage.setItem("villaSiteLang", lang);
 
@@ -134,6 +137,13 @@
     if (ogDesc && cel.seo[lang].description) ogDesc.content = cel.seo[lang].description;
     const ogLocale = $('meta[property="og:locale"]');
     if (ogLocale) ogLocale.content = lang === "he" ? "he_IL" : "en_US";
+    // Each language is its own indexable address, so canonical and og:url
+    // name the one on screen rather than always the Hebrew page.
+    const selfUrl = "https://villagefen.co.il/celebrations" + (lang === "en" ? "?lang=en" : "");
+    const canonical = $('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute("href", selfUrl);
+    const ogUrl = $('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute("content", selfUrl);
 
     $$("[data-i18n]").forEach((el) => {
       const val = t(el.getAttribute("data-i18n"));

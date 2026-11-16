@@ -25,8 +25,15 @@
     return;
   }
 
-  let lang = localStorage.getItem("villaSiteLang") || (navigator.language || "en").slice(0, 2);
+  // Hebrew is the default rather than the browser's language. The audience is
+  // Israeli, plenty of them run an English-language computer, and a crawler
+  // arrives as en-US — which meant the page Google indexed was the English
+  // one. ?lang= gives each language an address of its own, and whichever the
+  // visitor ends up on is remembered for next time.
+  const urlLang = new URLSearchParams(location.search).get("lang");
+  let lang = urlLang || localStorage.getItem("villaSiteLang") || "he";
   if (lang !== "en" && lang !== "he") lang = "he";
+  if (urlLang === "he" || urlLang === "en") localStorage.setItem("villaSiteLang", lang);
 
   let selection = { checkin: null, checkout: null };
   let today = new Date();
@@ -72,6 +79,16 @@
     const metaDesc = document.querySelector('meta[name="description"]');
     const descText = t("metaDescription");
     if (metaDesc && typeof descText === "string" && descText) metaDesc.setAttribute("content", descText);
+    // Each language is its own indexable address, so the canonical and og:url
+    // have to name the one being shown. Pointing the English view at the
+    // Hebrew page would tell Google not to index it at all.
+    const selfUrl = "https://villagefen.co.il/" + (lang === "en" ? "?lang=en" : "");
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute("href", selfUrl);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute("content", selfUrl);
+    const ogLocale = document.querySelector('meta[property="og:locale"]');
+    if (ogLocale) ogLocale.setAttribute("content", lang === "he" ? "he_IL" : "en_US");
     $$("[data-i18n]").forEach((el) => {
       const key = el.getAttribute("data-i18n");
       const val = t(key);
