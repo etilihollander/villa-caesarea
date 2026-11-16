@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Public pages only. The admin panel is excluded, and so are in-page anchors
+  such as #gallery or #amenities: they are sections of the home page, not
+  separate URLs. No lastmod, because the page text lives in the database and
+  changes without a matching change to these files, so any date here would be
+  wrong more often than right.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://villagefen.co.il/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://villagefen.co.il/celebrations</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://villagefen.co.il/accessibility</loc>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://villagefen.co.il/privacy</loc>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://villagefen.co.il/terms</loc>
+    <priority>0.2</priority>
+  </url>
+</urlset>
