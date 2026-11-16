@@ -67,6 +67,11 @@
 
   function applyI18n() {
     document.title = t("metaTitle");
+    // The description is metadata only — it is never rendered on the page.
+    // If the key is absent the Hebrew fallback in the markup stands.
+    const metaDesc = document.querySelector('meta[name="description"]');
+    const descText = t("metaDescription");
+    if (metaDesc && typeof descText === "string" && descText) metaDesc.setAttribute("content", descText);
     $$("[data-i18n]").forEach((el) => {
       const key = el.getAttribute("data-i18n");
       const val = t(key);
@@ -282,6 +287,9 @@
     });
     var aboutImg = data.images.find(function (img) { return img.isAbout; }) || data.images[1] || data.images[0];
     if (aboutImg) $("#aboutImage").src = aboutImg.file;
+    // alt is not shown on the page; it was still carrying the villa's former
+    // name, so it is taken from the current name in the chosen language.
+    $("#aboutImage").alt = data.content[lang].villaName;
   }
 
   /* ---------------- Gallery (category-based) ---------------- */

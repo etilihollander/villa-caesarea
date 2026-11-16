@@ -1,4 +1,10 @@
-# The admin panel is linked from every page's footer; keep it out of search.
+# Villa Gefen — https://villagefen.co.il/
 User-agent: *
+Allow: /
+
+# The admin panel is linked from every page's footer, so it has to be named
+# here as well as carrying its own noindex tag.
 Disallow: /admin
 Disallow: /admin.html
+
+Sitemap: https://villagefen.co.il/sitemap.xml
