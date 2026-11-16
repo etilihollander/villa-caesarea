@@ -1,6 +1,21 @@
-# Netlify rewrites — clean URLs.
-# A 200 rewrite serves the file without changing the address bar, so the
-# celebrations page lives at /celebrations in both languages
+# Netlify takes the FIRST matching rule, and a path-only rule matches on any
+# hostname — so the host redirects have to come before them, or a request to
+# the Netlify address would be served by the /admin rewrite below and never
+# reach the redirect.
+
+# The site answers on two hostnames: the custom domain and the Netlify one it
+# was first deployed to. Anyone arriving on the Netlify address stays there,
+# because every link in the site is relative — which is how the admin panel
+# kept showing up as melodic-dragon-614a92.netlify.app/admin. Sending the old
+# host to the real one fixes that for every page at once, and stops search
+# engines treating the two as separate copies of the same site.
+# Deploy previews live on deploy-preview-<n>--melodic-dragon-614a92.netlify.app,
+# a different hostname, so they are not caught by this and keep working.
+http://melodic-dragon-614a92.netlify.app/*   https://villagefen.co.il/:splat   301!
+https://melodic-dragon-614a92.netlify.app/*  https://villagefen.co.il/:splat   301!
+
+# Clean URLs. A 200 rewrite serves the file without changing the address bar,
+# so the celebrations page lives at /celebrations in both languages
 # (/celebrations?lang=he and /celebrations?lang=en are the hreflang targets;
 # query strings are forwarded automatically).
 /celebrations   /celebrations.html   200
